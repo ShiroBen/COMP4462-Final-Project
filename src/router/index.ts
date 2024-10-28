@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import TimeOrSpatial from '../components/TimeOrSpatial.vue'
-import TimeDV from '../components/TimeDV.vue'
-import SpatialDV from '../components/SpatialDV.vue'
+import TimeOrSpatial from '@/components/TimeOrSpatial.vue'
+import TimeDV from '@/components/TimeDV.vue'
+import SpatialDV from '@/components/SpatialDV.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
