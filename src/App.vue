@@ -9,7 +9,7 @@
       <el-container>
         <!-- navigate into time or spatial data -->
         <el-aside width=15vw class='navBar'>
-          <h3> Navigation </h3>
+          <h3 class="navHeading"> Navigation </h3>
           <el-menu 
             default-active='1'
             router=true
@@ -46,10 +46,41 @@
 <style scoped>
   .appHeader {
     text-align: center;
+    background-color: #42b983; 
+    color: white;
   }
 
   .navBar {
-
+    background-color: #f4f4f4; /* Light gray navbar */
+    padding: 4px;
+    border-right: 1px solid #e0e0e0; /* Light border */
+    height: 100vh; /* Full viewport height */
   }
 
+  .el-menu {
+    /*background-color: transparent; /* Transparent menu background - can add this as well */
+    border-right: none; /* Remove right border */
+  }
+
+  .el-menu-item {
+    color: #333; /* Dark text color */
+  }
+  .el-icon{
+    color: #333; /* Dark text color */
+  }
+  .el-menu-item:hover {
+    background-color: #e0e0e0; /* Light gray on hover */
+  }
+
+  .mainContent {
+    padding: 20px;
+    background-color: #ffffff; /* White background for main content */
+  }
+
+  .navHeading {
+    padding-bottom: 15px;
+    padding-left: 5px; /* Center align text */
+    margin-bottom: 10px; /* Optional: add space below the heading */
+    border-bottom: 2px solid #333; /* Line under the heading */
+  } 
 </style>
