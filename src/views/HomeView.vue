@@ -1,26 +1,21 @@
 <template>
-  <div class='mainbody'>
+  <div class="mainbody">
     <el-container>
       <!-- header of the app -->
-      <el-header class='appHeader'>
+      <el-header>
         <h1> Welcome to our project for visualizing Spotify data. </h1>
       </el-header>
       
       <el-container>
         <!-- navigate into time or spatial data -->
-        <el-aside width=15vw class='navBar'>
-          <h3> Navigation </h3>
-          <el-menu 
-            default-active='1'
-            router=true
-          >
-            <el-menu-item index='TimeDV'>
-              <el-icon><Clock /></el-icon>
-              <span>Time Data</span>
+        <el-aside width=15vw>
+          <h5> Navigation </h5>
+          <el-menu>
+            <el-menu-item index=1>
+              <RouterLink to="/TimeDV">Time Data</RouterLink>
             </el-menu-item>
-            <el-menu-item index='SpatialDV'>
-              <el-icon><Location /></el-icon>
-              <span>Spatial Data</span>
+            <el-menu-item index=2>
+              <RouterLink to="SpatialDV">Spatial Data</RouterLink>
             </el-menu-item>
           </el-menu>
         </el-aside>
@@ -40,16 +35,4 @@
   // import TimeOrSpatial from './views/TimeOrSpatial.vue';
   import TimeDV from '@/views/TimeDV.vue'
   import SpatialDV from '@/views/SpatialDV.vue'
-  import { Clock, Location } from '@element-plus/icons-vue'
 </script>
-
-<style scoped>
-  .appHeader {
-    text-align: center;
-  }
-
-  .navBar {
-
-  }
-
-</style>

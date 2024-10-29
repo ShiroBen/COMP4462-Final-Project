@@ -1,16 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import TimeOrSpatial from '@/components/TimeOrSpatial.vue'
-import TimeDV from '@/components/TimeDV.vue'
-import SpatialDV from '@/components/SpatialDV.vue'
+import HomeView from '@/views/HomeView.vue'
+import TimeDV from '@/views/TimeDV.vue'
+import SpatialDV from '@/views/SpatialDV.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: TimeOrSpatial
-    },
+    // {
+    //   path: '/',
+    //   name: 'home',
+    //   component: HomeView 
+    // },
     // {
     //   path: '/about',
     //   name: 'about',
