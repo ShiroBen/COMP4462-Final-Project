@@ -15,7 +15,7 @@
               <RouterLink to="/TimeDV">Time Data</RouterLink>
             </el-menu-item>
             <el-menu-item index=2>
-              <RouterLink to="SpatialDV">Spatial Data</RouterLink>
+              <RouterLink to="/SpatialDV">Spatial Data</RouterLink>
             </el-menu-item>
           </el-menu>
         </el-aside>
