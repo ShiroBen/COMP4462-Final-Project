@@ -6,9 +6,15 @@ import router from './router'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 
+// import d3.js
+import * as d3 from 'd3'
+
 const app = createApp(App)
 
 app.use(router)
+
+// use d3 for visualization
+app.use(d3)
 
 // use ElementPlus in our project
 app.use(ElementPlus)
