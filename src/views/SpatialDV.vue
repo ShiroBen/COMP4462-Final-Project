@@ -9,6 +9,7 @@
 <script lang="ts"> export default {name: 'SpatialDV'} </script>
 
 <script setup lang="ts">
+// @ts-ignore
 import D3Sample from '../components/d3-charts/D3Sample.vue'
 
 </script>

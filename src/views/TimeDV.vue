@@ -10,6 +10,7 @@ export default { name: "TimeDV" };
 </script>
 
 <script setup lang="ts">
+// @ts-ignore
 import simpleD3 from '../components/d3-charts/simpleD3.vue'
 </script>
 
