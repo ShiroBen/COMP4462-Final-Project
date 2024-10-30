@@ -5,3 +5,6 @@ Then in the terminal, execute npm run dev.
 
 Click on the localhost link.
 
+
+The data is too big therefore, we have put in Google Drive. Google Drive: https://drive.google.com/file/d/1hmupUxvUaHPcsBOSdsYko1wqtE59uKjg/view?usp=sharing
+
