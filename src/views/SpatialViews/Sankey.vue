@@ -1,17 +1,17 @@
 <template>
-    <div>
+    <div class="container">
       <div class="label-container">
         <router-link to="/SpatialDV" class="label" active-class="active">Choropleth</router-link>
         <router-link to="/sankey" class="label" active-class="active">Sankey</router-link>
         <router-link to="/cartogram" class="label" active-class="active">Cartogram</router-link>
       </div>
-      <h1>This is Default Choropleth</h1>
+      <h1>This is Sankey</h1>
     </div>
   </template>
   
   <script lang="ts">
   export default {
-    name: 'Choropleth',
+    name: 'Sankey',
   };
   </script>
   
@@ -19,7 +19,12 @@
   import { RouterLink } from 'vue-router'; // Import RouterLink for navigation
   </script>
   
-  <style>
+  <style scoped>
+  .choropleth-container {
+    padding: 20px; /* Add padding to the container for spacing */
+    background-color: #ffffff; /* Set background to white for main content */
+  }
+  
   .label-container {
     display: flex;                    /* Use flexbox for horizontal layout */
     justify-content: space-around;    /* Evenly distribute space */
@@ -29,21 +34,17 @@
   
   .label {
     text-decoration: none;            /* Remove underline */
-    color: black;                     /* Default text color */
+    color: black;                     /* Text color */
     transition: color 0.3s;          /* Smooth transition for color */
     padding: 10px 15px;               /* Padding for clickable area */
-    position: relative;               /* Position relative for pseudo-element */
   }
-  
-  
   
   .label:hover {
-    color: #66d6a1;                   /* Lighter green for hover */
+    color: green;                   /* Change color on hover to match app theme */
   }
   
-  .label.active,
-  .label.exact-active {
-    color: #66d6a1;                   
+  .label.active {
+    color: #42b983;                   /* Change color when active (clicked) */
   }
 
   .label:not(:last-child)::after {

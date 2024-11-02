@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import TimeDV from '@/views/TimeDV.vue'
 import SpatialDV from '@/views/SpatialDV.vue'
+import Sankey from '@/views/SpatialViews/Sankey.vue';      // Import the new component
+import Cartogram from '@/views/SpatialViews/Cartogram.vue'; // Import the new component
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,7 +30,17 @@ const router = createRouter({
       path: '/SpatialDV',
       name: 'SpatialDV',
       component: SpatialDV
-    }
+    },
+    {
+      path: '/Cartogram',
+      name: 'Cartogram',
+      component: Cartogram
+    },
+    {
+      path: '/Sankey',
+      name: 'Sankey',
+      component: Sankey
+    },
   ]
 })
 
