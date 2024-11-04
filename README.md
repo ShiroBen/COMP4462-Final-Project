@@ -8,7 +8,7 @@ in root directory to install all dependencies.
 
 Then, run:
 ```npm install ol```
-in root directory to install all dependencies.
+in root directory to install ol dependencies.
 
 Finally, you may execute command:
 ```npm run dev```
