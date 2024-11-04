@@ -1,6 +1,5 @@
 <template>
-  <div ref="map-root" style="width: 100%; height: 100%;">
-  </div>
+  <div ref="map-root" style="width: 100%; height: 100%;"></div>
 </template>
 
 <script>
@@ -8,82 +7,125 @@ import 'ol/ol.css';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
-import XYZ from 'ol/source/XYZ'; // Use XYZ for custom tile sources
+import XYZ from 'ol/source/XYZ';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { fromLonLat } from 'ol/proj';
 import { Style, Fill, Stroke } from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
-
-// Sample GeoJSON data for countries
-const geojsonCountries = {
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "properties": { "name": "Costa Rica", "color": "green" },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [[
-          [-82.54619625520348, 9.566134751824677], [-82.93289099804358, 9.476812038608173], [-82.92715491405916, 9.074330145702916], [-82.71918311230053, 8.925708726431495], [-82.86865719270477, 8.807266343618522], [-82.82977067740516, 8.62629547773237], [-82.91317643912421, 8.42351715741907], [-82.96578304719736, 8.225027980985985], [-83.50843726269431, 8.446926581247283], [-83.71147396516908, 8.656836249216866], [-83.59631303580665, 8.830443223501419], [-83.63264156770784, 9.051385809765321], [-83.90988562695374, 9.29080272057358], [-84.30340165885636, 9.487354030795714], [-84.64764421256866, 9.61553742109571], [-84.71335079622777, 9.908051866083852], [-84.97566036654133, 10.086723130733006], [-84.91137488477024, 9.795991522658923], [-85.11092342806532, 9.55703969974131], [-85.33948828809227, 9.83454214114866], [-85.66078650586698, 9.933347479690724], [-85.79744483106285, 10.134885565629034], [-85.79170874707843, 10.439337266476613], [-85.65931372754667, 10.75433095951172], [-85.94172543002176, 10.895278428587801], [-85.7125404528073, 11.088444932494824], [-85.5618519762442, 11.217119248901597], [-84.90300330273895, 10.952303371621896], [-84.67306901725627, 11.082657172078143], [-84.35593075228104, 10.999225572142905], [-84.19017859570485, 10.793450018756674], [-83.89505449088595, 10.726839097532446], [-83.65561174186158, 10.938764146361422], [-83.40231970898296, 10.395438137244653], [-83.01567664257517, 9.992982082555557], [-82.54619625520348, 9.566134751824677]
-        ]]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "name": "Panama", "color": "blue" },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [[
-          [-80.0, 8.0], [-79.0, 8.0], [-79.0, 9.0], [-80.0, 9.0], [-80.0, 8.0]
-        ]]
-      }
-    }
-    // Add more countries as needed
-  ]
-};
+import * as d3 from 'd3';
 
 export default {
   name: 'MapContainer',
+  data() {
+    return {
+      geojsonCountries: null,
+      danceabilityData: {},
+      selectedFeature: 'danceability',
+    };
+  },
   mounted() {
-    // CartoDB tile layer as the main map
-    const rasterLayer = new TileLayer({
-      source: new XYZ({
-        url: 'https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', // CartoDB tiles without labels
-      }),
-    });
+    // Load the GeoJSON and CSV dat
+    Promise.all([
+      this.loadGeoJSON('geo.json'), // Adjust path to your geo.json
+      d3.csv('src/datasets/combined_processed_2.csv'), // Adjust path to your CSV file
+    ])
+      .then(([geojsonData, csvData]) => {
+        this.geojsonCountries = geojsonData;
+        this.danceabilityData = this.processCSVData(csvData);
+        this.initMap();
+      })
+      .catch(error => {
+        alert ('Failed to load data:');
+      });
+  },
+  methods: {
+    updateMap() {
+      this.danceabilityData = this.processCSVData(this.csvData);
+      this.initMap();
+    },
+    loadGeoJSON(url) {
+      return d3.json(url);
+    },
+    processCSVData(csvData) {
+      const featureMap = {};
+      const countMap = {};
 
-    const vectorSource = new VectorSource({
-      features: new GeoJSON().readFeatures(geojsonCountries, {
-        dataProjection: 'EPSG:4326',
-        featureProjection: 'EPSG:3857', // Web Mercator projection
-      }),
-    });
+      csvData.forEach(d => {
+        const country = d.country;
+        const featureValue = +d[this.selectedFeature]; // Use selected feature
 
-    const vectorLayer = new VectorLayer({
-      source: vectorSource,
-      style: (feature) => {
-        return new Style({
-          fill: new Fill({
-            color: feature.get('color') || 'rgba(255, 255, 255, 0.6)', // Default color
-          }),
-          stroke: new Stroke({
-            color: 'black',
-            width: 1,
-          }),
-        });
-      },
-    });
+        if (!featureMap[country]) {
+          featureMap[country] = 0;
+          countMap[country] = 0;
+        }
+        // Accumulate the feature value and count
+        featureMap[country] += featureValue;
+        countMap[country] += 1;
+      });
 
-    // Create the map
-    new Map({
-      target: this.$refs['map-root'],
-      layers: [rasterLayer, vectorLayer],
-      view: new View({
-        zoom: 2,
-        center: fromLonLat([0, 0]), // Center the map
-      }),
-    });
+      // Calculate the average for each country based on the selected feature
+      const averageFeatureMap = {};
+      Object.keys(featureMap).forEach(country => {
+        averageFeatureMap[country] = featureMap[country] / countMap[country];
+      });
+
+      return averageFeatureMap;
+    },
+    
+    initMap() {
+      const rasterLayer = new TileLayer({
+        source: new XYZ({
+          url: 'https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+        }),
+      });
+
+      const vectorSource = new VectorSource({
+        features: new GeoJSON().readFeatures(this.geojsonCountries, {
+          dataProjection: 'EPSG:4326',
+          featureProjection: 'EPSG:3857',
+        }),
+      });
+
+      const vectorLayer = new VectorLayer({
+        source: vectorSource,
+        style: (feature) => {
+          const countryName = feature.get('name');
+          const featureValue = this.danceabilityData[countryName]; // Use the selected feature data
+
+          // Calculate min and max for the color scale
+          const featureValues = Object.values(this.danceabilityData);
+          const minFeature = d3.min(featureValues);
+          const maxFeature = d3.max(featureValues);
+
+          const colorScale = d3.scaleSequential(d3.interpolateBlues)
+            .domain([minFeature, maxFeature]); // Set domain based on the selected feature
+
+          return new Style({
+            fill: new Fill({
+              color: (countryName === 'Antarctica') 
+                ? 'rgba(0, 0, 0, 0)' // Transparent color for Antarctica
+                : (featureValue !== undefined ? colorScale(featureValue) : 'rgba(213, 222, 255, 0.4)'),
+            }),
+            stroke: new Stroke({
+              color: (countryName === 'Antarctica') 
+                ? 'rgba(0, 0, 0, 0)' // Transparent stroke for Antarctica
+                : 'black', // Dark grey stroke color for other countries
+              width: 1,
+            }),
+          });
+        },
+      });
+      // Create the map
+      new Map({
+        target: this.$refs['map-root'],
+        layers: [rasterLayer, vectorLayer],
+        view: new View({
+          zoom: 2,
+          center: fromLonLat([0, 20]), // Center the map appropriately
+        }),
+      });
+    },
   },
 };
 </script>
