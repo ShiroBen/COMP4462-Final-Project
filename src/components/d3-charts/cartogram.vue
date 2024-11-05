@@ -24,6 +24,9 @@ export default defineComponent({
         .attr("width", width)
         .attr("height", height);
 
+      // Create a group element to hold the map and bubbles
+      const g = svg.append("g");
+
       // Set up a projection and path generator
       const projection = geoMercator()
         .scale(150)
@@ -31,8 +34,7 @@ export default defineComponent({
       const pathGenerator = geoPath().projection(projection);
 
       // Draw each country
-      svg
-        .selectAll("path")
+      g.selectAll("path")
         .data(geojson.features)
         .enter()
         .append("path")
@@ -41,22 +43,26 @@ export default defineComponent({
         .attr("stroke", "#333");
 
       // Set up zoom behavior
-      const zoom = d3.zoom().on("zoom", (event) => {
-        svg.attr("transform", event.transform); // Apply zoom transformation to the SVG
-        this.updateBubbles(geojson, svg, pathGenerator, event.transform.k); // Update bubbles based on zoom level
-      });
+      const zoom = d3
+        .zoom()
+        .scaleExtent([1, 8]) // Optional: set min and max zoom levels
+        .on("zoom", (event) => {
+          g.attr("transform", event.transform); // Apply zoom transformation to the group
+          this.updateBubbles(geojson, svg, pathGenerator, event.transform.k); // Update bubbles based on zoom level
+        });
 
       svg.call(zoom);
 
       // Draw initial bubbles
       this.updateBubbles(geojson, svg, pathGenerator, 1); // Initial zoom level
     },
+
     updateBubbles(geojson, svg, pathGenerator, zoomLevel) {
       // Calculate centroids for each country
       const centroids = geojson.features
         .filter((feature) => {
           const countryName = feature.properties.name; // TODO: REMOVE
-          return countryName === "China" || countryName === "Vietnam";
+          return true;
         })
         .map((feature) => pathGenerator.centroid(feature));
 
