@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 // @ts-ignore
-import D3Sample from '../components/d3-charts/D3Sample.vue'
+import D3Sample from '../components/d3-charts/cartogram.vue'
 
 </script>
 
