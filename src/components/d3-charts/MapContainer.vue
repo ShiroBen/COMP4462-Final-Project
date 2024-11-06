@@ -1,5 +1,9 @@
 <template>
-  <div ref="map-root" style="width: 100%; height: 100%;"></div>
+  <div ref="map-root" style="width: 100%; height: 100%; position: relative;">
+    <div ref="tooltip" class="tooltip" v-if="tooltipContent">
+      {{ tooltipContent }}
+    </div>
+  </div>
 </template>
 
 <script>
@@ -22,6 +26,7 @@ export default {
       geojsonCountries: null,
       danceabilityData: {},
       selectedFeature: 'danceability',
+      tooltipContent: null,
     };
   },
   mounted() {
@@ -51,6 +56,7 @@ export default {
       const featureMap = {};
       const countMap = {};
 
+      // Process the CSV data
       csvData.forEach(d => {
         const country = d.country;
         const featureValue = +d[this.selectedFeature]; // Use selected feature
@@ -68,6 +74,16 @@ export default {
       const averageFeatureMap = {};
       Object.keys(featureMap).forEach(country => {
         averageFeatureMap[country] = featureMap[country] / countMap[country];
+      });
+
+      // Get countries from the GeoJSON and ensure they have a value
+      const countriesFromGeoJSON = new Set(this.geojsonCountries.features.map(feature => feature.properties.name)); // Adjust to match the property name in your GeoJSON
+
+      // Set value to 0 for countries not in the CSV data
+      countriesFromGeoJSON.forEach(country => {
+        if (!(country in averageFeatureMap)) {
+          averageFeatureMap[country] = 0; // Set value to 0 for countries not present in the CSV
+        }
       });
 
       return averageFeatureMap;
@@ -89,35 +105,10 @@ export default {
 
       const vectorLayer = new VectorLayer({
         source: vectorSource,
-        style: (feature) => {
-          const countryName = feature.get('name');
-          const featureValue = this.danceabilityData[countryName]; // Use the selected feature data
-
-          // Calculate min and max for the color scale
-          const featureValues = Object.values(this.danceabilityData);
-          const minFeature = d3.min(featureValues);
-          const maxFeature = d3.max(featureValues);
-
-          const colorScale = d3.scaleSequential(d3.interpolateBlues)
-            .domain([minFeature, maxFeature]); // Set domain based on the selected feature
-
-          return new Style({
-            fill: new Fill({
-              color: (countryName === 'Antarctica') 
-                ? 'rgba(0, 0, 0, 0)' // Transparent color for Antarctica
-                : (featureValue !== undefined ? colorScale(featureValue) : 'rgba(213, 222, 255, 0.4)'),
-            }),
-            stroke: new Stroke({
-              color: (countryName === 'Antarctica') 
-                ? 'rgba(0, 0, 0, 0)' // Transparent stroke for Antarctica
-                : 'black', // Dark grey stroke color for other countries
-              width: 1,
-            }),
-          });
-        },
+        style: this.getStyle.bind(this), // Bind the style method for dynamic styling
       });
       // Create the map
-      new Map({
+      this.map = new Map({
         target: this.$refs['map-root'],
         layers: [rasterLayer, vectorLayer],
         view: new View({
@@ -125,11 +116,131 @@ export default {
           center: fromLonLat([0, 20]), // Center the map appropriately
         }),
       });
+      
+      this.addHoverInteraction(vectorLayer);
+    },
+    
+    addHoverInteraction(layer) {
+      const defaultStyle = layer.getStyleFunction();
+      
+      // Define a function to get the fill color based on the feature data
+      const getFillColor = (feature) => {
+        const countryName = feature.get('name');
+        const featureValue = this.danceabilityData[countryName];
+
+        // Calculate min and max for the color scale
+        const featureValues = Object.values(this.danceabilityData);
+        const minFeature = d3.min(featureValues.filter(value => value > 0));
+        const maxFeature = d3.max(featureValues);
+
+        // Create a color scale based on the feature value
+        const colorScale = d3.scaleSequential(d3.interpolateBlues)
+          .domain([minFeature, maxFeature]);
+
+        return featureValue !== undefined ? colorScale(featureValue) : 'rgba(213, 222, 255, 0.4)'; // Default color if no value
+      };
+
+      let currentlyHighlightedFeature = null; // To keep track of the currently highlighted feature
+      this.tooltipContent = null; // Tooltip content management
+
+      const highlightFeature = (feature) => {
+        const fillColor = getFillColor(feature); // Get the fill color based on the feature value
+        const highlightStyle = new Style({
+          fill: new Fill({
+            color: fillColor, // Keep the original fill color based on the feature value
+          }),
+          stroke: new Stroke({
+            color: 'black', // Change stroke color to black
+            width: 2.5, // Make the stroke thicker
+          }),
+        });
+
+        feature.setStyle(highlightStyle);
+        currentlyHighlightedFeature = feature; // Update the currently highlighted feature
+
+        // Update the tooltip content
+        const countryName = feature.get('name');
+        const featureValue = this.danceabilityData[countryName];
+        if (featureValue == 0){
+          this.tooltipContent = `${countryName}: No Data Available`; // If no data available
+        } else {
+          this.tooltipContent = `${countryName}: ${featureValue.toFixed(2)}`; // Format value to two decimal places
+        }
+      };
+
+      const resetFeature = (feature) => {
+        feature.setStyle(defaultStyle(feature));
+      };
+
+      // Pointer move event
+      this.map.on('pointermove', (evt) => {
+        const feature = this.map.forEachFeatureAtPixel(evt.pixel, (feature) => feature);
+        if (feature) {
+          // If the hovered feature is different from the currently highlighted feature
+          if (currentlyHighlightedFeature !== feature) {
+            // Reset the style of the previously highlighted feature
+            if (currentlyHighlightedFeature) {
+              resetFeature(currentlyHighlightedFeature);
+            }
+            // Highlight the new feature
+            highlightFeature(feature);
+          }
+          
+          // Show tooltip
+          this.$refs.tooltip.style.display = 'block';
+          this.$refs.tooltip.style.left = `${evt.pixel[0] + 10}px`;
+          this.$refs.tooltip.style.top = `${evt.pixel[1] + 10}px`;
+        } else {
+          // If no feature is hovered, reset the currently highlighted feature
+          if (currentlyHighlightedFeature) {
+            resetFeature(currentlyHighlightedFeature);
+            currentlyHighlightedFeature = null; // Clear the currently highlighted feature
+          }
+          this.tooltipContent = null; // Hide tooltip
+          this.$refs.tooltip.style.display = 'none'; // Hide tooltip
+        }
+      });
+    },
+    getStyle(feature) {
+      const countryName = feature.get('name');
+      const featureValue = this.danceabilityData[countryName];
+
+      const featureValues = Object.values(this.danceabilityData);
+      const minFeature = d3.min(featureValues.filter(value => value > 0));
+      const maxFeature = d3.max(featureValues);
+
+      const colorScale = d3.scaleSequential(d3.interpolateBlues)
+        .domain([minFeature, maxFeature]);
+
+      return new Style({
+        fill: new Fill({
+          color: (countryName === 'Antarctica') 
+            ? 'rgba(0, 0, 0, 0)' 
+            : ((featureValue !== undefined && featureValue !=0) ? colorScale(featureValue) : 'rgba(213, 222, 255, 0.4)'),
+        }),
+        stroke: new Stroke({
+          color: (countryName === 'Antarctica') 
+            ? 'rgba(0, 0, 0, 0)' 
+            : 'black',
+          width: 1,
+        }),
+      });
     },
   },
 };
+      
+    
 </script>
 
 <style scoped>
-/* Optional styles for MapContainer */
+.tooltip {
+  position: absolute;
+  background: white;
+  color: black;
+  border: 1px solid black;
+  padding: 5px;
+  pointer-events: none; /* Prevent tooltip from interfering with mouse events */
+  z-index: 10;
+  display: none; /* Initially hidden */
+}
 </style>
