@@ -5,20 +5,9 @@
       <router-link to="/sankey" class="label" active-class="active">Sankey</router-link>
       <router-link to="/cartogram" class="label" active-class="active">Cartogram</router-link>
     </div>
-    <h1>This is Default Choropleth</h1>
     
     <div class="map-container">
       <MapContainer />
-      <div class="filter-container">
-        <label for="filter-selector" class="filter-label">Choose Variable:</label>
-        <select id="filter-selector">
-          <option disabled selected value="">Select an option...</option>
-          <option value="option1">Danceability</option>
-          <option value="option2">Instrumentalness</option>
-          <option value="option3">Streams</option>
-          <option value="option4">More</option>
-        </select>
-      </div>
     </div>
   </div>
 </template>
@@ -75,26 +64,10 @@ import { RouterLink } from 'vue-router'; // Import RouterLink for navigation
   display: flex; /* Use flexbox to align map and filter container */
   justify-content: space-between; /* Space between map and filter */
   width: 100%;         
-  height: 450px;      
+  height: 490px;      
   margin-top: 20px;   
   border: 1px solid #ccc; /* Optional: Add a border for visibility */
 }
 
-/* Style for the filter container */
-.filter-container {
-  display: flex;
-  flex-direction: column; /* Stack label and select vertically */
-  padding: 10px; /* Add padding */
-}
 
-.filter-label {
-  font-size: 1.0em; /* Set the font size to smaller */
-  margin-bottom: 10px; /* Space between label and select */
-}
-
-select {
-  padding: 5px; /* Padding for select */
-  border: 1px solid #ccc; /* Border for select */
-  border-radius: 4px; /* Rounded corners */
-}
 </style>

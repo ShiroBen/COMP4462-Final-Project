@@ -1,7 +1,22 @@
 <template>
-  <div ref="map-root" style="width: 100%; height: 100%; position: relative;">
-    <div ref="tooltip" class="tooltip" v-if="tooltipContent">
-      {{ tooltipContent }}
+  <div style="display: flex; height: 100%; width: 100%;">
+    <div ref="map-root" style="flex: 1; position: relative;">
+      <div ref="tooltip" class="tooltip" v-if="tooltipContent">
+        {{ tooltipContent }}
+      </div>
+    </div>
+    <div class="filter-container">
+      <label for="filter-selector" class="filter-label">Choose Variable:</label>
+      <select id="filter-selector" v-model="selectedFeature" @change="updateMap">
+        <option disabled value="">Select an option...</option>
+        <option value="danceability">Danceability</option>
+        <option value="liveness">Liveness</option>
+        <option value="Streams">Streams</option>
+        <option value="energy">Energy</option>
+        <option value="loudness">Loudness</option>
+        <option value="valence">Valence</option>
+        <option value="acousticness">Acousticness</option>
+      </select>
     </div>
   </div>
 </template>
@@ -27,27 +42,42 @@ export default {
       danceabilityData: {},
       selectedFeature: 'danceability',
       tooltipContent: null,
+      csvData: [],
+      //map: null, // Store the map instance
+      //vectorLayer: null, // Store the vector layer
     };
   },
   mounted() {
-    // Load the GeoJSON and CSV dat
+    // Load the GeoJSON and CSV data
     Promise.all([
       this.loadGeoJSON('geo.json'), // Adjust path to your geo.json
       d3.csv('src/datasets/combined_processed_2.csv'), // Adjust path to your CSV file
     ])
       .then(([geojsonData, csvData]) => {
         this.geojsonCountries = geojsonData;
+        this.csvData = csvData;
         this.danceabilityData = this.processCSVData(csvData);
         this.initMap();
       })
       .catch(error => {
-        alert ('Failed to load data:');
+        alert('Failed to load data: ' + error);
       });
   },
   methods: {
     updateMap() {
+      // Update danceabilityData based on the newly selected feature
+      this.danceabilityData = {};
       this.danceabilityData = this.processCSVData(this.csvData);
-      this.initMap();
+      
+      // Update the vector layer's style
+      if (this.vectorLayer) {
+        this.vectorLayer.setStyle(this.getStyle.bind(this));
+        this.vectorLayer.getSource().clear(); // Clear existing features
+        this.vectorLayer.getSource().addFeatures(new GeoJSON().readFeatures(this.geojsonCountries, {
+          dataProjection: 'EPSG:4326',
+          featureProjection: 'EPSG:3857',
+        }));
+      }
     },
     loadGeoJSON(url) {
       return d3.json(url);
@@ -55,12 +85,10 @@ export default {
     processCSVData(csvData) {
       const featureMap = {};
       const countMap = {};
-
       // Process the CSV data
       csvData.forEach(d => {
         const country = d.country;
         const featureValue = +d[this.selectedFeature]; // Use selected feature
-
         if (!featureMap[country]) {
           featureMap[country] = 0;
           countMap[country] = 0;
@@ -77,7 +105,7 @@ export default {
       });
 
       // Get countries from the GeoJSON and ensure they have a value
-      const countriesFromGeoJSON = new Set(this.geojsonCountries.features.map(feature => feature.properties.name)); // Adjust to match the property name in your GeoJSON
+      const countriesFromGeoJSON = new Set(this.geojsonCountries.features.map(feature => feature.properties.name));
 
       // Set value to 0 for countries not in the CSV data
       countriesFromGeoJSON.forEach(country => {
@@ -103,21 +131,24 @@ export default {
         }),
       });
 
-      const vectorLayer = new VectorLayer({
+      this.vectorLayer = new VectorLayer({
         source: vectorSource,
         style: this.getStyle.bind(this), // Bind the style method for dynamic styling
       });
-      // Create the map
-      this.map = new Map({
-        target: this.$refs['map-root'],
-        layers: [rasterLayer, vectorLayer],
-        view: new View({
-          zoom: 2,
-          center: fromLonLat([0, 20]), // Center the map appropriately
-        }),
-      });
-      
-      this.addHoverInteraction(vectorLayer);
+
+      // Create the map only once
+      if (!this.map) {
+        this.map = new Map({
+          target: this.$refs['map-root'],
+          layers: [rasterLayer, this.vectorLayer],
+          view: new View({
+            zoom: 1,
+            center: fromLonLat([15, 20]), // Center the map appropriately
+          }),
+        });
+        
+        this.addHoverInteraction(this.vectorLayer);
+      }
     },
     
     addHoverInteraction(layer) {
@@ -130,14 +161,14 @@ export default {
 
         // Calculate min and max for the color scale
         const featureValues = Object.values(this.danceabilityData);
-        const minFeature = d3.min(featureValues.filter(value => value > 0));
-        const maxFeature = d3.max(featureValues);
+        const minFeature = d3.min(featureValues.filter(value => value != 0));
+        const maxFeature = d3.max(featureValues.filter (value => value != 0));
 
         // Create a color scale based on the feature value
         const colorScale = d3.scaleSequential(d3.interpolateBlues)
           .domain([minFeature, maxFeature]);
 
-        return featureValue !== undefined ? colorScale(featureValue) : 'rgba(213, 222, 255, 0.4)'; // Default color if no value
+        return (featureValue !== undefined && featureValue != 0) ? colorScale(featureValue) : 'rgba(0,0,0,0.25)'; // Default color if no value
       };
 
       let currentlyHighlightedFeature = null; // To keep track of the currently highlighted feature
@@ -206,8 +237,8 @@ export default {
       const featureValue = this.danceabilityData[countryName];
 
       const featureValues = Object.values(this.danceabilityData);
-      const minFeature = d3.min(featureValues.filter(value => value > 0));
-      const maxFeature = d3.max(featureValues);
+      const minFeature = d3.min(featureValues.filter(value => value != 0));
+      const maxFeature = d3.max(featureValues.filter (value => value != 0));
 
       const colorScale = d3.scaleSequential(d3.interpolateBlues)
         .domain([minFeature, maxFeature]);
@@ -216,7 +247,7 @@ export default {
         fill: new Fill({
           color: (countryName === 'Antarctica') 
             ? 'rgba(0, 0, 0, 0)' 
-            : ((featureValue !== undefined && featureValue !=0) ? colorScale(featureValue) : 'rgba(213, 222, 255, 0.4)'),
+            : ((featureValue !== undefined && featureValue !=0) ? colorScale(featureValue) : 'rgba(0, 0, 0, 0.25)'),
         }),
         stroke: new Stroke({
           color: (countryName === 'Antarctica') 
@@ -242,5 +273,22 @@ export default {
   pointer-events: none; /* Prevent tooltip from interfering with mouse events */
   z-index: 10;
   display: none; /* Initially hidden */
+}
+
+.filter-container {
+  display: flex;
+  flex-direction: column; /* Stack label and select vertically */
+  padding: 10px; /* Add padding */
+}
+
+.filter-label {
+  font-size: 1.0em; /* Set the font size to smaller */
+  margin-bottom: 10px; /* Space between label and select */
+}
+
+select {
+  padding: 5px; /* Padding for select */
+  border: 1px solid #ccc; /* Border for select */
+  border-radius: 4px; /* Rounded corners */
 }
 </style>
