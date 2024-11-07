@@ -17,6 +17,7 @@
         <option value="valence">Valence</option>
         <option value="acousticness">Acousticness</option>
       </select>
+      <div class="color-legend" ref="legend"></div>
     </div>
   </div>
 </template>
@@ -43,6 +44,7 @@ export default {
       selectedFeature: 'danceability',
       tooltipContent: null,
       csvData: [],
+      //colorScale: null,
       //map: null, // Store the map instance
       //vectorLayer: null, // Store the vector layer
     };
@@ -58,6 +60,7 @@ export default {
         this.csvData = csvData;
         this.danceabilityData = this.processCSVData(csvData);
         this.initMap();
+        this.updateLegend();
       })
       .catch(error => {
         alert('Failed to load data: ' + error);
@@ -68,7 +71,7 @@ export default {
       // Update danceabilityData based on the newly selected feature
       this.danceabilityData = {};
       this.danceabilityData = this.processCSVData(this.csvData);
-      
+      this.updateLegend();
       // Update the vector layer's style
       if (this.vectorLayer) {
         this.vectorLayer.setStyle(this.getStyle.bind(this));
@@ -150,6 +153,71 @@ export default {
         this.addHoverInteraction(this.vectorLayer);
       }
     },
+
+    updateLegend() {
+      const legend = d3.select(this.$refs.legend);
+      legend.selectAll("*").remove(); // Clear existing legend items
+
+      // Get the feature values for the current selected feature
+      const featureValues = Object.values(this.danceabilityData);
+      const minFeature = d3.min(featureValues.filter(value => (value != 0 && value < 1000000)));
+      const maxFeature = d3.max(featureValues.filter(value => (value != 0 && value < 1000000)));
+
+      // Create a linear color scale based on the feature values
+      const colorScale = d3.scaleSequential(d3.interpolateBlues)
+        .domain([minFeature, maxFeature]);
+
+      // Dimensions for the legend
+      const legendWidth = 150;
+      const legendHeight = 25;
+
+      // Create an SVG element for the legend
+      const svg = legend.append("svg")
+        .attr("width", legendWidth)
+        .attr("height", legendHeight + 30); // Additional height for labels
+
+      // Create a gradient for the legend
+      const gradient = svg.append("defs").append("linearGradient")
+        .attr("id", "gradient");
+
+      // Define gradient stops
+      gradient.selectAll("stop")
+        .data(d3.range(0, 1, 0.01)) // Create stops from 0 to 1
+        .enter().append("stop")
+          .attr("offset", d => `${d * 100}%`)
+          .attr("stop-color", d => colorScale(minFeature + d * (maxFeature - minFeature))); // Use the color scale
+
+      // Create a rectangle for the gradient
+      svg.append("rect")
+        .attr("width", legendWidth)
+        .attr("height", legendHeight)
+        .style("fill", "url(#gradient)")
+        .style("stroke", "black")
+        .style("stroke-width", 1);
+
+      function formatNumber(num) {
+        if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M'; // Millions
+        if (num >= 1e3) return (num / 1e3).toFixed(1) + 'k'; // Thousands
+        if (num < 1) return (num.toFixed(2));
+        return num.toString(); // Fallback for smaller numbers
+      }
+
+      // Add text labels for the min and max values
+      svg.append("text")
+        .attr("x", 0) // Position at the left end
+        .attr("y", legendHeight + 12) // Position below the legend
+        .attr("text-anchor", "start") // Align text to start
+        .attr ("font-size", "12px") // font size
+        .text(formatNumber(minFeature)); // Display minimum value
+
+      svg.append("text")
+        .attr("x", legendWidth) // Position at the right end
+        .attr("y", legendHeight + 12) // Position below the legend
+        .attr("text-anchor", "end") // Align text to end
+        .attr ("font-size", "12px") // font size
+        .text(formatNumber(maxFeature)); // Display maximum value
+      
+    },
     
     addHoverInteraction(layer) {
       const defaultStyle = layer.getStyleFunction();
@@ -167,6 +235,8 @@ export default {
         // Create a color scale based on the feature value
         const colorScale = d3.scaleSequential(d3.interpolateBlues)
           .domain([minFeature, maxFeature]);
+
+        this.colorScale = colorScale;
 
         return (featureValue !== undefined && featureValue != 0) ? colorScale(featureValue) : 'rgba(0,0,0,0.25)'; // Default color if no value
       };
@@ -291,4 +361,19 @@ select {
   border: 1px solid #ccc; /* Border for select */
   border-radius: 4px; /* Rounded corners */
 }
+
+.color-legend {
+  display: flex;
+  flex-direction: column; /* Stack legend items vertically */
+  margin-top: 15px;
+  margin-left: 2px;
+}
+
+.color-legend div {
+  height: 20px; /* Height for each legend item */
+  line-height: 20px; /* Center text vertically */
+  color: #000; /* Text color */
+  padding-left: 5px; /* Space between text and background */
+}
+
 </style>
