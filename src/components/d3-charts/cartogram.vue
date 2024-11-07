@@ -161,7 +161,7 @@ export default defineComponent({
       });
 
       // Clear existing bubbles before drawing new ones
-      svg.selectAll("circle").remove();
+      svg.selectAll("rect").remove();
       svg.selectAll("path.bell").remove();
 
       // Draw bubbles and bell curves
@@ -181,10 +181,11 @@ export default defineComponent({
 
         // Append the bubble with the adjusted coordinates
         svg
-          .append("circle")
-          .attr("cx", x)
-          .attr("cy", y)
-          .attr("r", 20) // Adjust radius based on zoom level
+          .append("rect")
+          .attr("x", x - 10) // Adjust to center the square at (x, y)
+          .attr("y", y - 10) // Adjust to center the square at (x, y)
+          .attr("width", 20) // Set width of the square
+          .attr("height", 20) // Set height of the square
           .attr("fill", color);
 
         // Generate points for the bell curve
@@ -211,7 +212,7 @@ export default defineComponent({
           .attr("class", "bell")
           .attr("d", bellPath(bellPoints))
           .attr("fill", "none")
-          .attr("stroke", color);
+          .attr("stroke", "black");
       });
 
       // Log or return the list of merged country groups with final colors
