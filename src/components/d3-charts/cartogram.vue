@@ -27,20 +27,27 @@ export default defineComponent({
       // Create a group element to hold the map and bubbles
       const g = svg.append("g");
 
+      // Set up a color scale for unique colors per country
+      const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
       // Set up a projection and path generator
       const projection = geoMercator()
         .scale(150)
         .translate([width / 2, height / 1.5]);
       const pathGenerator = geoPath().projection(projection);
 
-      // Draw each country
+      // Draw each country with a unique color
       g.selectAll("path")
         .data(geojson.features)
         .enter()
         .append("path")
         .attr("d", pathGenerator)
-        .attr("fill", "#cccccc")
-        .attr("stroke", "#333");
+        .attr("fill", (d) => colorScale(d.properties.name)) // Use color scale based on country name
+        .attr("stroke", "#333")
+        .each(function (d) {
+          // Save the color in each feature for bubble coloring
+          d.properties.color = colorScale(d.properties.name);
+        });
 
       // Set up zoom behavior
       const zoom = d3
@@ -58,24 +65,23 @@ export default defineComponent({
     },
 
     updateBubbles(geojson, svg, pathGenerator, zoomLevel) {
-      // Calculate centroids for each country
       const centroids = geojson.features
-        .filter((feature) => {
-          const countryName = feature.properties.name; // TODO: REMOVE
-          return true;
-        })
-        .map((feature) => pathGenerator.centroid(feature));
+        .filter((feature) => true)
+        .map((feature) => ({
+          centroid: pathGenerator.centroid(feature),
+          color: feature.properties.color, // Use the assigned color for each country
+        }));
 
-      // Merging logic
-      const thresholdDistance = 50 / zoomLevel; // Adjust threshold based on zoom level
+      const thresholdDistance = 50 / zoomLevel;
       const mergedBubbles = [];
 
+      // Merge bubbles if centroids are close
       for (let i = 0; i < centroids.length; i++) {
         let merged = false;
 
         for (let j = 0; j < mergedBubbles.length; j++) {
           const distance = this.calculateDistance(
-            centroids[i],
+            centroids[i].centroid,
             mergedBubbles[j].centroid
           );
           if (distance < thresholdDistance) {
@@ -87,10 +93,11 @@ export default defineComponent({
         }
 
         if (!merged) {
-          // Create a new bubble entry
+          // Create a new bubble entry with color
           mergedBubbles.push({
-            centroid: centroids[i],
+            centroid: centroids[i].centroid,
             count: 1,
+            color: centroids[i].color,
           });
         }
       }
@@ -101,30 +108,37 @@ export default defineComponent({
 
       // Draw bubbles and bell curves
       mergedBubbles.forEach((bubble) => {
-        const [x, y] = bubble.centroid;
-        const counter = bubble.count;
+        let [x, y] = bubble.centroid;
+        const color = bubble.color;
 
-        // Append the bubble
+        // Adjust x, y coordinates by the current zoom transformation
+        const transform = d3.zoomTransform(svg.node());
+        x = transform.applyX(x);
+        y = transform.applyY(y);
+
+        // Check if the bubble is within the visible bounds of the SVG
+        if (x < 0 || x > svg.attr("width") || y < 0 || y > svg.attr("height")) {
+          return; // Skip drawing this bubble if it's outside the viewport
+        }
+
+        // Append the bubble with the adjusted coordinates
         svg
           .append("circle")
           .attr("cx", x)
           .attr("cy", y)
-          .attr("r", 20) // Fixed radius for the bubble
-          .attr("fill", "lightblue");
+          .attr("r", 20) // Adjust radius based on zoom level
+          .attr("fill", color);
 
         // Generate points for the bell curve
         const bellPoints = [];
-        const numPoints = 100; // Number of points to generate for the bell curve
-        const A = counter; // Scale height by counter
-        const mu = 0; // Mean (center of the bell curve)
-        const sigma = 10; // Standard deviation (width of the bell curve)
+        const numPoints = 100;
+        const A = bubble.count;
+        const mu = 0;
+        const sigma = 10;
 
         for (let i = -15; i <= 15; i++) {
-          const xPos = x + i; // Position X of the bell curve
-          const yPos =
-            y -
-            A * Math.exp(-((i - mu) ** 2) / (2 * sigma ** 2)) +
-            Math.cos(x * x); // Bell curve equation
+          const xPos = x + i;
+          const yPos = y - A * Math.exp(-((i - mu) ** 2) / (2 * sigma ** 2));
           bellPoints.push([xPos, yPos]);
         }
 
@@ -139,9 +153,10 @@ export default defineComponent({
           .attr("class", "bell")
           .attr("d", bellPath(bellPoints))
           .attr("fill", "none")
-          .attr("stroke", "blue");
+          .attr("stroke", color);
       });
     },
+
     loadMapData() {
       // Load GeoJSON data
       d3.json("src/datasets/countries.geo.json")
