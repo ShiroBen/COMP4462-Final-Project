@@ -37,11 +37,60 @@ class UnionFind {
 }
 
 export default defineComponent({
+  data() {
+    return {
+      tempoBuckets: null, // Initialize tempoBuckets as null to store the data later
+    };
+  },
   mounted() {
-    this.loadMapData();
+    this.createTempoHistogram("src/datasets/cartogram.countries.data.json"); // Call with the JSON path
   },
   methods: {
+    createTempoHistogram(jsonPath) {
+      // Load JSON data and calculate tempo buckets
+      d3.json(jsonPath).then((data) => {
+        // Extract all tempo values across all countries to determine the global min and max
+        const allTempos = [];
+        for (const country in data.tempo) {
+          allTempos.push(...data.tempo[country]);
+        }
+        const globalMin = d3.min(allTempos);
+        const globalMax = d3.max(allTempos);
+
+        // Calculate bucket size
+        const bucketSize = (globalMax - globalMin) / 10;
+
+        // Prepare the histogram data for each country
+        const countryBuckets = {};
+
+        for (const country in data.tempo) {
+          const countryTempos = data.tempo[country];
+          const buckets = new Array(10).fill(0);
+
+          // For each tempo, determine its bucket
+          countryTempos.forEach((tempo) => {
+            const bucketIndex = Math.min(
+              Math.floor((tempo - globalMin) / bucketSize),
+              9 // To handle edge case where tempo == globalMax
+            );
+            buckets[bucketIndex]++;
+          });
+
+          // Save the bucket counts for this country
+          countryBuckets[country] = buckets;
+        }
+
+        // Store the computed buckets in `this.tempoBuckets`
+        this.tempoBuckets = countryBuckets;
+        console.log("Tempo Buckets:", this.tempoBuckets);
+
+        // Call loadMapData once tempoBuckets are ready
+        this.loadMapData();
+      });
+    },
     drawMap(geojson) {
+      console.log(this.tempoBuckets);
+      
       const width = 800;
       const height = 500;
 
