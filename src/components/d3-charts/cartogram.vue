@@ -7,6 +7,7 @@
 import { defineComponent } from "vue";
 import * as d3 from "d3";
 import { geoPath, geoMercator } from "d3-geo";
+import { List } from "@element-plus/icons-vue";
 
 class UnionFind {
   constructor(elements) {
@@ -89,8 +90,8 @@ export default defineComponent({
       });
     },
     drawMap(geojson) {
-      console.log(this.tempoBuckets);
-      
+      console.log(this.tempoBuckets.Germany);
+
       const width = 800;
       const height = 500;
 
@@ -164,6 +165,7 @@ export default defineComponent({
         name: feature.properties.name,
         centroid: pathGenerator.centroid(feature),
         color: feature.properties.color, // Use the assigned color for each country
+        tempoBuckets: this.tempoBuckets[feature.properties.name] || new Array(10).fill(0),
       }));
 
       const thresholdDistance = 50 / zoomLevel;
@@ -186,18 +188,31 @@ export default defineComponent({
             // Merge into existing bubble and update Union-Find structure
             uf.union(centroids[i].name, mergedBubbles[j].name);
             mergedBubbles[j].count += 1;
+
+            // Ensure tempoBuckets is defined before merging
+            if (!Array.isArray(mergedBubbles[j].tempoBuckets)) {
+              mergedBubbles[j].tempoBuckets = new Array(10).fill(0);
+            }
+
+            centroids[i].tempoBuckets?.forEach((count, index) => {
+              mergedBubbles[j].tempoBuckets[index] += count;
+            });
+
             merged = true;
             break;
           }
         }
 
         if (!merged) {
-          // Create a new bubble entry with color and name
+          // Create a new bubble entry with color, name, and tempo bucket data
           mergedBubbles.push({
             centroid: centroids[i].centroid,
             count: 1,
             color: centroids[i].color,
             name: centroids[i].name,
+            tempoBuckets: [
+              ...(centroids[i].tempoBuckets || new Array(10).fill(0)),
+            ], // Copy or default to empty array
           });
         }
       }
@@ -213,7 +228,7 @@ export default defineComponent({
       svg.selectAll("rect").remove();
       svg.selectAll("path.bell").remove();
 
-      // Draw bubbles and bell curves
+      // Draw bubbles and histograms
       mergedBubbles.forEach((bubble) => {
         let [x, y] = bubble.centroid;
         const color = bubble.color;
@@ -228,40 +243,41 @@ export default defineComponent({
           return; // Skip drawing this bubble if it's outside the viewport
         }
 
-        // Append the bubble with the adjusted coordinates
+        // Append the bubble with the adjusted coordinates as a square
         svg
           .append("rect")
-          .attr("x", x - 10) // Adjust to center the square at (x, y)
-          .attr("y", y - 10) // Adjust to center the square at (x, y)
-          .attr("width", 20) // Set width of the square
-          .attr("height", 20) // Set height of the square
+          .attr("x", x - 10) // Center the square at (x, y)
+          .attr("y", y - 10)
+          .attr("width", 20)
+          .attr("height", 20)
           .attr("fill", color);
 
-        // Generate points for the bell curve
-        const bellPoints = [];
-        const numPoints = 100;
-        const A = bubble.count;
-        const mu = 0;
-        const sigma = 10;
+        // Draw histogram above the bubble based on `tempoBuckets`
+        const bucketWidth = 5;
+        const maxCount = d3.max(bubble.tempoBuckets);
+        const scaleY = d3.scaleLinear().domain([0, maxCount]).range([0, 30]); // Set maximum height of the histogram
 
-        for (let i = -15; i <= 15; i++) {
-          const xPos = x + i;
-          const yPos = y - A * Math.exp(-((i - mu) ** 2) / (2 * sigma ** 2));
-          bellPoints.push([xPos, yPos]);
-        }
+        console.log(bubble.tempoBuckets);
+        bubble.tempoBuckets.forEach((count, i) => {
+          // Calculate the height of each bar based on bucket count
+          const barHeight = scaleY(count);
 
-        // Create a path for the bell curve
-        const bellPath = d3
-          .line()
-          .x((d) => d[0])
-          .y((d) => d[1]);
-
-        svg
-          .append("path")
-          .attr("class", "bell")
-          .attr("d", bellPath(bellPoints))
-          .attr("fill", "none")
-          .attr("stroke", "black");
+          // Append a rectangle for each histogram bar
+          svg
+            .append("rect")
+            .attr(
+              "x",
+              x -
+                (bucketWidth * bubble.tempoBuckets.length) / 2 +
+                i * bucketWidth
+            )
+            .attr("y", y - 20 - barHeight) // Position above the bubble
+            .attr("width", bucketWidth)
+            .attr("height", barHeight)
+            .attr("fill", color)
+            .attr("stroke", "black")
+            .attr("stroke-width", 0.5);
+        });
       });
 
       // Log or return the list of merged country groups with final colors
