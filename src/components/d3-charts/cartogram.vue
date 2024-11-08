@@ -161,7 +161,10 @@ export default defineComponent({
     },
 
     updateBubbles(geojson, svg, pathGenerator, zoomLevel) {
-      const centroids = geojson.features.map((feature) => ({
+      const countriesThatAreInDataset = ['Lithuania', 'Latvia', 'Germany', 'France', 'Ireland', 'Japan', 'Philippines', 'India', 'Guatemala', 'Canada', 'Costa Rica', 'United Kingdom', 'United States of America', 'Malaysia', 'Bolivia', 'Italy', 'Mexico', 'Colombia', 'Netherlands', 'Brazil', 'Norway', 'Ecuador', 'Iceland', 'Greece', 'Estonia', 'Sweden', 'Australia', 'Taiwan', 'Denmark', 'Dominican Republic', 'Turkey', 'Hungary', 'El Salvador', 'Honduras', 'Belgium', 'South Korea', 'Austria', 'Uruguay', 'Panama', 'Spain', 'Finland', 'Paraguay', 'Peru', 'Luxembourg', 'Chile', 'New Zealand', 'Portugal', 'Czech Republic', 'China', 'Poland', 'Argentina'];
+
+      const centroids = geojson.features.filter((feature) => countriesThatAreInDataset.includes(feature.properties.name))
+      .map((feature) => ({
         name: feature.properties.name,
         centroid: pathGenerator.centroid(feature),
         color: feature.properties.color, // Use the assigned color for each country
@@ -242,16 +245,6 @@ export default defineComponent({
         if (x < 0 || x > svg.attr("width") || y < 0 || y > svg.attr("height")) {
           return; // Skip drawing this bubble if it's outside the viewport
         }
-
-        // Append the bubble with the adjusted coordinates as a square
-        svg
-          .append("rect")
-          .attr("x", x - 10) // Center the square at (x, y)
-          .attr("y", y - 10)
-          .attr("width", 20)
-          .attr("height", 20)
-          .attr("fill", color);
-
         // Draw histogram above the bubble based on `tempoBuckets`
         const bucketWidth = 5;
         const maxCount = d3.max(bubble.tempoBuckets);
