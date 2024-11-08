@@ -106,7 +106,61 @@ export default defineComponent({
       const g = svg.append("g");
 
       // Set up a color scale for unique colors per country
-      const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+      const defaultColor = "#808080"; // Grey color for countries not in the dictionary
+
+      const countryColors = {
+        Lithuania: "#FF5733", // Red-orange
+        Latvia: "#33FF57", // Green
+        Germany: "#3357FF", // Blue
+        France: "#F1C40F", // Yellow
+        Ireland: "#FF6347", // Tomato
+        Japan: "#8A2BE2", // Blue violet
+        Philippines: "#FFD700", // Gold
+        India: "#FF1493", // Deep pink
+        Guatemala: "#00FA9A", // Medium spring green
+        Canada: "#00BFFF", // Deep sky blue
+        "Costa Rica": "#FF4500", // Orange red
+        "United Kingdom": "#DA70D6", // Orchid
+        "United States of America": "#ADFF2F", // Green yellow
+        Malaysia: "#20B2AA", // Light sea green
+        Bolivia: "#D2691E", // Chocolate
+        Italy: "#FF4500", // Orange red
+        Mexico: "#32CD32", // Lime green
+        Colombia: "#C71585", // Medium violet red
+        Netherlands: "#DC143C", // Crimson
+        Brazil: "#228B22", // Forest green
+        Norway: "#8B0000", // Dark red
+        Ecuador: "#FFFF00", // Yellow
+        Iceland: "#00CED1", // Dark turquoise
+        Greece: "#4682B4", // Steel blue
+        Estonia: "#FF8C00", // Dark orange
+        Sweden: "#C71585", // Medium violet red
+        Australia: "#32CD32", // Lime green
+        Taiwan: "#FFD700", // Gold
+        Denmark: "#B22222", // Firebrick
+        "Dominican Republic": "#F0E68C", // Khaki
+        Turkey: "#FF6347", // Tomato
+        Hungary: "#FF69B4", // Hot pink
+        "El Salvador": "#6A5ACD", // Slate blue
+        Honduras: "#FF8C00", // Dark orange
+        Belgium: "#800080", // Purple
+        "South Korea": "#3CB371", // Medium sea green
+        Austria: "#B0C4DE", // Light steel blue
+        Uruguay: "#FFD700", // Gold
+        Panama: "#C0C0C0", // Silver
+        Spain: "#FF6347", // Tomato
+        Finland: "#00008B", // Dark blue
+        Paraguay: "#8B4513", // Saddle brown
+        Peru: "#D2691E", // Chocolate
+        Luxembourg: "#A52A2A", // Brown
+        Chile: "#D3D3D3", // Light grey
+        "New Zealand": "#FF1493", // Deep pink
+        Portugal: "#8A2BE2", // Blue violet
+        "Czech Republic": "#4682B4", // Steel blue
+        China: "#DC143C", // Crimson
+        Poland: "#FF4500", // Orange red
+        Argentina: "#2E8B57", // Sea green
+      };
 
       // Set up a projection and path generator
       const projection = d3
@@ -121,12 +175,12 @@ export default defineComponent({
         .enter()
         .append("path")
         .attr("d", pathGenerator)
-        .attr("fill", (d) => colorScale(d.properties.name)) // Initial color based on country name
+        .attr("fill", (d) => countryColors[d.properties.name] || defaultColor) // Use dictionary color or default grey
         .attr("stroke", "#333")
         .attr("data-name", (d) => d.properties.name) // Set a unique data-name attribute
         .each(function (d) {
           // Save the initial color in each feature for bubble coloring
-          d.properties.color = colorScale(d.properties.name);
+          d.properties.color = countryColors[d.properties.name] || defaultColor;
         });
 
       // Set up zoom behavior
@@ -161,15 +215,71 @@ export default defineComponent({
     },
 
     updateBubbles(geojson, svg, pathGenerator, zoomLevel) {
-      const countriesThatAreInDataset = ['Lithuania', 'Latvia', 'Germany', 'France', 'Ireland', 'Japan', 'Philippines', 'India', 'Guatemala', 'Canada', 'Costa Rica', 'United Kingdom', 'United States of America', 'Malaysia', 'Bolivia', 'Italy', 'Mexico', 'Colombia', 'Netherlands', 'Brazil', 'Norway', 'Ecuador', 'Iceland', 'Greece', 'Estonia', 'Sweden', 'Australia', 'Taiwan', 'Denmark', 'Dominican Republic', 'Turkey', 'Hungary', 'El Salvador', 'Honduras', 'Belgium', 'South Korea', 'Austria', 'Uruguay', 'Panama', 'Spain', 'Finland', 'Paraguay', 'Peru', 'Luxembourg', 'Chile', 'New Zealand', 'Portugal', 'Czech Republic', 'China', 'Poland', 'Argentina'];
+      const countriesThatAreInDataset = [
+        "Lithuania",
+        "Latvia",
+        "Germany",
+        "France",
+        "Ireland",
+        "Japan",
+        "Philippines",
+        "India",
+        "Guatemala",
+        "Canada",
+        "Costa Rica",
+        "United Kingdom",
+        "United States of America",
+        "Malaysia",
+        "Bolivia",
+        "Italy",
+        "Mexico",
+        "Colombia",
+        "Netherlands",
+        "Brazil",
+        "Norway",
+        "Ecuador",
+        "Iceland",
+        "Greece",
+        "Estonia",
+        "Sweden",
+        "Australia",
+        "Taiwan",
+        "Denmark",
+        "Dominican Republic",
+        "Turkey",
+        "Hungary",
+        "El Salvador",
+        "Honduras",
+        "Belgium",
+        "South Korea",
+        "Austria",
+        "Uruguay",
+        "Panama",
+        "Spain",
+        "Finland",
+        "Paraguay",
+        "Peru",
+        "Luxembourg",
+        "Chile",
+        "New Zealand",
+        "Portugal",
+        "Czech Republic",
+        "China",
+        "Poland",
+        "Argentina",
+      ];
 
-      const centroids = geojson.features.filter((feature) => countriesThatAreInDataset.includes(feature.properties.name))
-      .map((feature) => ({
-        name: feature.properties.name,
-        centroid: pathGenerator.centroid(feature),
-        color: feature.properties.color, // Use the assigned color for each country
-        tempoBuckets: this.tempoBuckets[feature.properties.name] || new Array(10).fill(0),
-      }));
+      const centroids = geojson.features
+        .filter((feature) =>
+          countriesThatAreInDataset.includes(feature.properties.name)
+        )
+        .map((feature) => ({
+          name: feature.properties.name,
+          centroid: pathGenerator.centroid(feature),
+          color: feature.properties.color, // Use the assigned color for each country
+          tempoBuckets:
+            this.tempoBuckets[feature.properties.name] || new Array(10).fill(0),
+        }));
 
       const thresholdDistance = 50 / zoomLevel;
       const mergedBubbles = [];
