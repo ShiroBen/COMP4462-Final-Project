@@ -1,6 +1,6 @@
 <template>
   <div style="display: flex; height: 100%; width: 100%;">
-    <div ref="map-root" style="flex: 1; position: relative;">
+    <div ref="map-root" style="flex: 1; position: relative; height:100%">
       <div ref="tooltip" class="tooltip" v-if="tooltipContent">
         {{ tooltipContent }}
       </div>
@@ -18,6 +18,7 @@
         <option value="acousticness">Acousticness</option>
       </select>
       <div class="color-legend" ref="legend"></div>
+      <div ref="barChart" class="bar-chart"></div> <!-- Bar chart container below the map -->
     </div>
   </div>
 </template>
@@ -44,6 +45,7 @@ export default {
       selectedFeature: 'danceability',
       tooltipContent: null,
       csvData: [],
+      selectedCountries: [],
       //colorScale: null,
       //map: null, // Store the map instance
       //vectorLayer: null, // Store the vector layer
@@ -61,6 +63,8 @@ export default {
         this.danceabilityData = this.processCSVData(csvData);
         this.initMap();
         this.updateLegend();
+        this.updateBarChart();
+        this.overallData = this.processAllCSVData(csvData);
       })
       .catch(error => {
         alert('Failed to load data: ' + error);
@@ -119,6 +123,42 @@ export default {
 
       return averageFeatureMap;
     },
+
+    processAllCSVData(csvData) {
+      const featureMap = {};
+      csvData.forEach(d => {
+        const country = d.country;
+        if (!featureMap[country]) {
+          featureMap[country] = {
+            acousticness: 0,
+            instrumentalness: 0,
+            danceability: 0,
+            // Add other features as necessary
+            count: 0,
+          };
+        }
+
+        // Accumulate feature values
+        for (const feature in featureMap[country]) {
+          if (feature !== 'count') {
+            featureMap[country][feature] += +d[feature] || 0;
+          }
+        }
+        featureMap[country].count += 1; // Increment count for averaging later
+      });
+
+      // Calculate averages for each feature
+      this.overallData = Object.keys(featureMap).map(country => {
+        const features = featureMap[country];
+        return {
+          country,
+          acousticness: features.acousticness / features.count,
+          instrumentalness: features.instrumentalness / features.count,
+          danceability: features.danceability / features.count,
+          // Add other features as necessary
+        };
+      });
+    },
     
     initMap() {
       const rasterLayer = new TileLayer({
@@ -154,6 +194,74 @@ export default {
       }
     },
 
+     
+    updateBarChart() {
+      
+      const dummyData = this.selectedCountries
+      .map(name => ({
+        name,
+        value: this.danceabilityData[name] || 0,
+      }))
+      .filter(d => d.value > 0); 
+      // Clear existing chart
+      const svg = d3.select(this.$refs.barChart)
+        .selectAll("*").remove();
+
+      const margin = { top: 20, right: 0, bottom: 40, left: 35 };
+      const width = 185;
+      const height = 200;
+
+      // Create scales
+      const x = d3.scaleLinear()
+        .domain([0.4, d3.max(dummyData, d => d.value)])
+        .range([0, width]);
+
+      const y = d3.scaleBand()
+        .domain(dummyData.map(d => d.name))
+        .range([0, height])
+        .padding(0.2);
+
+      
+
+      const svgContainer = d3.select(this.$refs.barChart) // Select the container again
+        .append("svg")
+        .attr("width", width + margin.left)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      // Create horizontal bars
+      svgContainer.selectAll('rect')
+        .data(dummyData)
+        .enter()
+        .append("rect")
+          .attr("class", "bar")
+          .attr("y", d => y(d.name))
+          .attr("x", 0) // Start from the left
+          .attr("height", y.bandwidth())
+          .attr("width", d => x(d.value))
+          .attr("fill", "steelblue");
+
+      // Add the x-axis
+      svgContainer.append("g")
+        .attr("class", "axis axis-x")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).ticks(10).tickValues(d3.range(0.4, d3.max(dummyData, d => d.value) + 0.1, 0.05)));
+
+      // Add the y-axis
+      const yAxis = svgContainer.append("g")
+        .attr("class", "axis axis-y")
+        .call(d3.axisLeft(y));
+
+      yAxis.selectAll(".tick text") // Use .tick text to select only the text elements of the ticks
+          .attr("transform", "rotate(-90)") // Rotate labels 45 degrees
+          .attr("dy", "-1.5em") // Adjust vertical alignment
+          .attr("dx", "2em") // Adjust horizontal position
+          .style("text-anchor", "end") // Align text to the end
+          .style("font-size", "15px"); // Increase font size (adjust as needed)
+
+    },
+
     updateLegend() {
       const legend = d3.select(this.$refs.legend);
       legend.selectAll("*").remove(); // Clear existing legend items
@@ -168,7 +276,7 @@ export default {
         .domain([minFeature, maxFeature]);
 
       // Dimensions for the legend
-      const legendWidth = 150;
+      const legendWidth = 220;
       const legendHeight = 25;
 
       // Create an SVG element for the legend
@@ -301,6 +409,39 @@ export default {
           this.$refs.tooltip.style.display = 'none'; // Hide tooltip
         }
       });
+
+      // Pointer leave event
+      this.map.on('pointerleave', () => {
+        if (currentlyHighlightedFeature) {
+          resetFeature(currentlyHighlightedFeature);
+          currentlyHighlightedFeature = null; // Clear the currently highlighted feature
+        }
+        this.tooltipContent = null; // Hide tooltip
+        this.$refs.tooltip.style.display = 'none'; // Hide tooltip
+      });
+
+      this.map.on('singleclick', (evt) => {
+        const feature = this.map.forEachFeatureAtPixel(evt.pixel, (feature) => feature);
+        if (feature) {
+          const countryName = feature.get('name');
+          const countryValue = this.danceabilityData[countryName] || 0; // Get the value for the country
+
+          // Proceed only if the value is greater than 0
+          if (countryValue > 0) {
+            if (this.selectedCountries.includes(countryName)) {
+              // Deselect if already selected
+              this.selectedCountries = this.selectedCountries.filter(c => c !== countryName);
+            } else {
+              // Ensure only two countries can be selected
+              if (this.selectedCountries.length >= 2) {
+                this.selectedCountries.shift(); // Remove the first country if two are already selected
+              }
+              this.selectedCountries.push(countryName); // Add the new country
+            }
+            this.updateBarChart(); // Update the bar chart based on selection
+          }
+        }
+      });
     },
     getStyle(feature) {
       const countryName = feature.get('name');
@@ -360,6 +501,13 @@ select {
   padding: 5px; /* Padding for select */
   border: 1px solid #ccc; /* Border for select */
   border-radius: 4px; /* Rounded corners */
+}
+
+.bar-chart {
+  margin-top: 110px; /* Space above the bar chart */
+  margin-left: 0px;
+  margin-right: 0px;
+  width: 100%; /* Width of the bar chart */
 }
 
 .color-legend {
