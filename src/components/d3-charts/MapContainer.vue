@@ -35,6 +35,7 @@ import { fromLonLat } from 'ol/proj';
 import { Style, Fill, Stroke } from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
 import * as d3 from 'd3';
+import d3tip from 'd3-tip';
 
 export default {
   name: 'MapContainer',
@@ -76,6 +77,8 @@ export default {
       this.danceabilityData = {};
       this.danceabilityData = this.processCSVData(this.csvData);
       this.updateLegend();
+      this.selectedCountries = []; // Clear selected countries
+      this.updateBarChart();
       // Update the vector layer's style
       if (this.vectorLayer) {
         this.vectorLayer.setStyle(this.getStyle.bind(this));
@@ -209,12 +212,13 @@ export default {
 
       const margin = { top: 20, right: 0, bottom: 40, left: 35 };
       const width = 185;
-      const height = 200;
+      const height = 70 * this.selectedCountries.length;
 
       // Create scales
       const x = d3.scaleLinear()
-        .domain([0.4, d3.max(dummyData, d => d.value)])
+        .domain([d3.min(dummyData, d => d.value) - 0.1, d3.max(dummyData, d => d.value)])
         .range([0, width]);
+
 
       const y = d3.scaleBand()
         .domain(dummyData.map(d => d.name))
@@ -230,6 +234,19 @@ export default {
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
+      const tooltip = d3tip()
+        .style('border', 'solid 3px black')
+        .style('background-color', 'white')
+        .style('border-radius', '10px')
+        .style('font-family', 'monospace')
+        .html((event, d) => `
+          <div>
+            <strong>Country:</strong> ${d.name}<br/>
+            <strong>Value:</strong> ${d.value}<br/>
+          </div>`);
+
+      svgContainer.call(tooltip);
+       
       // Create horizontal bars
       svgContainer.selectAll('rect')
         .data(dummyData)
@@ -240,13 +257,25 @@ export default {
           .attr("x", 0) // Start from the left
           .attr("height", y.bandwidth())
           .attr("width", d => x(d.value))
-          .attr("fill", "steelblue");
+          .attr("fill", "steelblue")
+          .style('stroke', 'black')
+          .on('mouseover', function (event, d) {
+            d3.select(this)
+              .attr('opacity', 0.5)
+          })
+          .on('mouseover', tooltip.show)  
+          // Listen to the "mouseout" event, and reset the value of "hovering" and color
+          .on('mouseout', function (event, d) {
+            d3.select(this)
+              .attr('opacity', 1)
+          })
+          .on ('mouseout', tooltip.hide);
 
       // Add the x-axis
       svgContainer.append("g")
         .attr("class", "axis axis-x")
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x).ticks(10).tickValues(d3.range(0.4, d3.max(dummyData, d => d.value) + 0.1, 0.05)));
+        .call(d3.axisBottom(x).ticks(10).tickValues(d3.range(d3.min(dummyData, d=> d.value) - 0.1, d3.max(dummyData, d => d.value) + 0.1, 0.05)));
 
       // Add the y-axis
       const yAxis = svgContainer.append("g")
@@ -433,7 +462,7 @@ export default {
               this.selectedCountries = this.selectedCountries.filter(c => c !== countryName);
             } else {
               // Ensure only two countries can be selected
-              if (this.selectedCountries.length >= 2) {
+              if (this.selectedCountries.length >= 3) {
                 this.selectedCountries.shift(); // Remove the first country if two are already selected
               }
               this.selectedCountries.push(countryName); // Add the new country
@@ -504,7 +533,7 @@ select {
 }
 
 .bar-chart {
-  margin-top: 110px; /* Space above the bar chart */
+  margin-top: 20px; /* Space above the bar chart */
   margin-left: 0px;
   margin-right: 0px;
   width: 100%; /* Width of the bar chart */
