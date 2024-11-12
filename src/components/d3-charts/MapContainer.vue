@@ -199,96 +199,249 @@ export default {
 
      
     updateBarChart() {
-      
-      const dummyData = this.selectedCountries
-      .map(name => ({
-        name,
-        value: this.danceabilityData[name] || 0,
-      }))
-      .filter(d => d.value > 0); 
-      // Clear existing chart
-      const svg = d3.select(this.$refs.barChart)
-        .selectAll("*").remove();
+      if (this.selectedFeature!= 'loudness'){
+        const dummyData = this.selectedCountries
+        .map(name => ({
+          name,
+          value: this.danceabilityData[name] || 0,
+        }))
+        .filter(d => d.value > 0); 
+        // Clear existing chart
+        const svg = d3.select(this.$refs.barChart)
+          .selectAll("*").remove();
 
-      const margin = { top: 20, right: 0, bottom: 40, left: 35 };
-      const width = 185;
-      const height = 70 * this.selectedCountries.length;
+        if (this.selectedCountries.length === 0) {
+          return; // Do not create the chart if no countries are selected
+        }
 
-      // Create scales
-      const x = d3.scaleLinear()
-        .domain([d3.min(dummyData, d => d.value) - 0.1, d3.max(dummyData, d => d.value)])
-        .range([0, width]);
+        const margin = { top: 20, right: 0, bottom: 40, left: 35 };
+        const width = 185;
+        const height = 70 * this.selectedCountries.length;
+        let choice = 1;
+        if(this.selectedFeature == 'Streams'){
+          choice = 10000;
+        }
+        // Create scales
+        const x = d3.scaleLinear()
+          .domain([0, d3.max(dummyData, d => d.value) + 0.1 * choice])
+          .range([0, width]);
 
 
-      const y = d3.scaleBand()
-        .domain(dummyData.map(d => d.name))
-        .range([0, height])
-        .padding(0.2);
+        const y = d3.scaleBand()
+          .domain(dummyData.map(d => d.name))
+          .range([0, height])
+          .padding(0.2);
 
-      
+        
 
-      const svgContainer = d3.select(this.$refs.barChart) // Select the container again
-        .append("svg")
-        .attr("width", width + margin.left)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
+        const svgContainer = d3.select(this.$refs.barChart) // Select the container again
+          .append("svg")
+          .attr("width", width + margin.left)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", `translate(${margin.left},${margin.top})`);
 
-      const tooltip = d3tip()
-        .style('border', 'solid 3px black')
-        .style('background-color', 'white')
-        .style('border-radius', '10px')
-        .style('font-family', 'monospace')
-        .html((event, d) => `
-          <div>
-            <strong>Country:</strong> ${d.name}<br/>
-            <strong>Value:</strong> ${d.value}<br/>
-          </div>`);
+        const tooltip = d3tip()
+          .style('border', 'solid 1px black')
+          .style('background-color', 'white')
+          .style('border-radius', '10px')
+          .style ('padding', '5px')
+          .html((event, d) => {
+              const formatValue = (value) => {
+                if (value >= 1000) {
+                  return (value / 1000).toFixed(1) + 'k'; 
+                }
+                return value.toPrecision(4); 
+              };
 
-      svgContainer.call(tooltip);
-       
-      // Create horizontal bars
-      svgContainer.selectAll('rect')
-        .data(dummyData)
-        .enter()
-        .append("rect")
-          .attr("class", "bar")
-          .attr("y", d => y(d.name))
-          .attr("x", 0) // Start from the left
-          .attr("height", y.bandwidth())
-          .attr("width", d => x(d.value))
-          .attr("fill", "steelblue")
-          .style('stroke', 'black')
-          .on('mouseover', function (event, d) {
-            d3.select(this)
-              .attr('opacity', 0.5)
-          })
-          .on('mouseover', tooltip.show)  
-          // Listen to the "mouseout" event, and reset the value of "hovering" and color
-          .on('mouseout', function (event, d) {
-            d3.select(this)
-              .attr('opacity', 1)
-          })
-          .on ('mouseout', tooltip.hide);
+              const formattedValue = formatValue(d.value);
 
-      // Add the x-axis
-      svgContainer.append("g")
-        .attr("class", "axis axis-x")
-        .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x).ticks(10).tickValues(d3.range(d3.min(dummyData, d=> d.value) - 0.1, d3.max(dummyData, d => d.value) + 0.1, 0.05)));
+              return `
+                <div>
+                  <strong>Country:</strong> ${d.name}<br/>
+                  <strong>Value:</strong> ${formattedValue}<br/>
+                </div>`;
+            });
 
+        svgContainer.call(tooltip);
+        
+        // Create horizontal bars
+        svgContainer.selectAll('rect')
+          .data(dummyData)
+          .enter()
+          .append("rect")
+            .attr("class", "bar")
+            .attr("y", d => y(d.name))
+            .attr("x", 0) // Start from the left
+            .attr("height", y.bandwidth())
+            .attr("width", d => x(d.value))
+            .attr("fill", "steelblue")
+            .style('stroke', 'black')
+            .on('mouseover', function (event, d) {
+              d3.select(this)
+                .attr('opacity', 0.5)
+            })
+            .on('mouseover', tooltip.show)  
+            // Listen to the "mouseout" event, and reset the value of "hovering" and color
+            .on('mouseout', function (event, d) {
+              d3.select(this)
+                .attr('opacity', 1)
+            })
+            .on ('mouseout', tooltip.hide);
+        
+        const yAxis = svgContainer.append("g")
+          .attr("class", "axis axis-y")
+          .call(d3.axisLeft(y));
+
+        yAxis.selectAll(".tick text") // Use .tick text to select only the text elements of the ticks
+            .attr("transform", "rotate(-90)") // Rotate labels 45 degrees
+            .attr("dy", "-1.5em") // Adjust vertical alignment
+            .attr("dx", "2em") // Adjust horizontal position
+            .style("text-anchor", "end") // Align text to the end
+            .style("font-size", "15px"); // Increase font size (adjust as needed)
+
+
+        // Add the x-axis
+        if (this.selectedCountries != [] && this.selectedFeature != 'Streams'){
+          svgContainer.append("g")
+            .attr("class", "axis axis-x")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).ticks(10).tickValues(d3.range(0, d3.max(dummyData, d => d.value) + 0.1, 0.1)));
+        }
+        else if (this.selectedFeature == 'Streams') {
+          let margin = 1000;
+          if (d3.max(dummyData, d => d.value)> 1000){
+            margin = 1000;
+          }
+          if (d3.max(dummyData, d => d.value)> 5000){
+            margin = 5000;
+          }
+          if (d3.max(dummyData, d => d.value)> 10000){
+            margin = 10000;
+          }
+          if (d3.max(dummyData, d => d.value)> 50000){
+            margin = 50000;
+          }
+          if (d3.max(dummyData, d => d.value)> 100000){
+            margin = 100000;
+          }
+
+          svgContainer.append("g")
+            .attr("class", "axis axis-x")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x)
+            .tickValues(d3.range(0, d3.max(dummyData, d => d.value) + 1000, margin)))
+            .tickFormat(formatTick); // Apply the custom tick format
+        }
+      }
+      else {
+        const dummyData = this.selectedCountries
+        .map(name => ({
+          name,
+          value: this.danceabilityData[name] || 0,
+        }))
+        .filter(d => d.value != 0); 
+        // Clear existing chart
+        const svg = d3.select(this.$refs.barChart)
+          .selectAll("*").remove();
+
+        if (this.selectedCountries.length === 0) {
+          return; // Do not create the chart if no countries are selected
+        }
+
+        const margin = { top: 20, right: 0, bottom: 40, left: 35 };
+        const width = 185;
+        const height = 70 * this.selectedCountries.length;
+        
+        // Create scales
+        const x = d3.scaleLinear()
+          .domain([d3.min(dummyData, d => d.value) - 0.1, d3.max(dummyData, d => d.value) + 0.1])
+          .range([0, width]);
+
+
+        const y = d3.scaleBand()
+          .domain(dummyData.map(d => d.name))
+          .range([0, height])
+          .padding(0.2);
+
+        
+
+        const svgContainer = d3.select(this.$refs.barChart) // Select the container again
+          .append("svg")
+          .attr("width", width + margin.left)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const tooltip = d3tip()
+          .style('border', 'solid 1px black')
+          .style('background-color', 'white')
+          .style('border-radius', '10px')
+          .style ('padding', '5px')
+          .html((event, d) => {
+              const formatValue = (value) => {
+                if (value >= 1000) {
+                  return (value / 1000).toFixed(1) + 'k'; 
+                }
+                return value.toPrecision(4); 
+              };
+
+              const formattedValue = formatValue(d.value);
+
+              return `
+                <div>
+                  <strong>Country:</strong> ${d.name}<br/>
+                  <strong>Value:</strong> ${formattedValue}<br/>
+                </div>`;
+            });
+
+        svgContainer.call(tooltip);
+        
+        // Create horizontal bars
+        svgContainer.selectAll('rect')
+          .data(dummyData)
+          .enter()
+          .append("rect")
+            .attr("class", "bar")
+            .attr("y", d => y(d.name))
+            .attr("x", 0) // Start from the left
+            .attr("height", y.bandwidth())
+            .attr("width", d => x(d.value))
+            .attr("fill", "steelblue")
+            .style('stroke', 'black')
+            .on('mouseover', function (event, d) {
+              d3.select(this)
+                .attr('opacity', 0.5)
+            })
+            .on('mouseover', tooltip.show)  
+            // Listen to the "mouseout" event, and reset the value of "hovering" and color
+            .on('mouseout', function (event, d) {
+              d3.select(this)
+                .attr('opacity', 1)
+            })
+            .on ('mouseout', tooltip.hide);
+        
+        const yAxis = svgContainer.append("g")
+          .attr("class", "axis axis-y")
+          .call(d3.axisLeft(y));
+
+        yAxis.selectAll(".tick text") // Use .tick text to select only the text elements of the ticks
+            .attr("transform", "rotate(-90)") // Rotate labels 45 degrees
+            .attr("dy", "-1.5em") // Adjust vertical alignment
+            .attr("dx", "2em") // Adjust horizontal position
+            .style("text-anchor", "end") // Align text to the end
+            .style("font-size", "15px"); // Increase font size (adjust as needed)
+
+
+        // Add the x-axis
+        if (this.selectedCountries != [] && this.selectedFeature != 'Streams'){
+          svgContainer.append("g")
+            .attr("class", "axis axis-x")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).ticks(10).tickValues(d3.range(d3.min(dummyData, d => d.value) - 0.1, d3.max(dummyData, d => d.value) + 0.1, 0.1)));
+        }
+      }
       // Add the y-axis
-      const yAxis = svgContainer.append("g")
-        .attr("class", "axis axis-y")
-        .call(d3.axisLeft(y));
-
-      yAxis.selectAll(".tick text") // Use .tick text to select only the text elements of the ticks
-          .attr("transform", "rotate(-90)") // Rotate labels 45 degrees
-          .attr("dy", "-1.5em") // Adjust vertical alignment
-          .attr("dx", "2em") // Adjust horizontal position
-          .style("text-anchor", "end") // Align text to the end
-          .style("font-size", "15px"); // Increase font size (adjust as needed)
-
     },
 
     updateLegend() {
@@ -456,7 +609,7 @@ export default {
           const countryValue = this.danceabilityData[countryName] || 0; // Get the value for the country
 
           // Proceed only if the value is greater than 0
-          if (countryValue > 0) {
+          if (countryValue != 0) {
             if (this.selectedCountries.includes(countryName)) {
               // Deselect if already selected
               this.selectedCountries = this.selectedCountries.filter(c => c !== countryName);
