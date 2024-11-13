@@ -1,5 +1,18 @@
 <template>
   <div id="map-container"></div>
+  <div class="filter-container">
+      <label for="filter-selector" class="filter-label">Choose Variable:</label>
+      <select id="filter-selector" v-model="selectedFeature" @change="changeVariable">
+        <option disabled value="">Select an option...</option>
+        <option value="danceability">Danceability</option>
+        <option value="liveness">Liveness</option>
+        <option value="Streams">Streams</option>
+        <option value="energy">Energy</option>
+        <option value="loudness">Loudness</option>
+        <option value="valence">Valence</option>
+        <option value="acousticness">Acousticness</option>
+      </select>
+    </div>
 </template>
 
 <script>
@@ -40,6 +53,7 @@ export default defineComponent({
   name: 'Cartogram',
   data() {
     return {
+      selectedFeature: "tempo", 
       tempoBuckets: null, // Initialize tempoBuckets as null to store the data later
     };
   },
@@ -47,6 +61,9 @@ export default defineComponent({
     this.createTempoHistogram("src/datasets/cartogram.countries.data.json"); // Call with the JSON path
   },
   methods: {
+    changeVariable() {
+      console.log("selected feature is ", this.selectedFeature);
+    },
     createTempoHistogram(jsonPath) {
       // Load JSON data and calculate tempo buckets
       d3.json(jsonPath).then((data) => {

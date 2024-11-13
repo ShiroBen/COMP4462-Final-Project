@@ -8,16 +8,6 @@
     
     <div class="map-container">
       <Cartogram />
-      <div class="filter-container">
-        <label for="filter-selector" class="filter-label">Choose Variable:</label>
-        <select id="filter-selector">
-          <option disabled selected value="">Select an option...</option>
-          <option value="option1">Danceability</option>
-          <option value="option2">Instrumentalness</option>
-          <option value="option3">Streams</option>
-          <option value="option4">More</option>
-        </select>
-      </div>
     </div>
   </div>
 </template>
