@@ -83,14 +83,12 @@ export default defineComponent({
 
         // Store the computed buckets in `this.tempoBuckets`
         this.tempoBuckets = countryBuckets;
-        console.log("Tempo Buckets:", this.tempoBuckets);
 
         // Call loadMapData once tempoBuckets are ready
         this.loadMapData();
       });
     },
     drawMap(geojson) {
-      console.log(this.tempoBuckets.Germany);
 
       const width = 800;
       const height = 500;
@@ -360,7 +358,6 @@ export default defineComponent({
         const maxCount = d3.max(bubble.tempoBuckets);
         const scaleY = d3.scaleLinear().domain([0, maxCount]).range([0, 30]); // Set maximum height of the histogram
 
-        console.log(bubble.tempoBuckets);
         bubble.tempoBuckets.forEach((count, i) => {
           // Calculate the height of each bar based on bucket count
           const barHeight = scaleY(count);
