@@ -10,6 +10,12 @@ Then, run:
 ```npm install ol```
 in root directory to install ol dependencies.
 
+Then, to be safe run
+```npm install d3```
+
+Sometimes the tooltip might also not load so also run:
+```npm i d3-tip```
+
 Finally, you may execute command:
 ```npm run dev```
 to start a local server and enjoy our visualizations!
