@@ -1,5 +1,4 @@
 <template>
-  <h1>World Map with Bubbles</h1>
   <div id="map-container"></div>
 </template>
 
@@ -38,6 +37,7 @@ class UnionFind {
 }
 
 export default defineComponent({
+  name: 'Cartogram',
   data() {
     return {
       tempoBuckets: null, // Initialize tempoBuckets as null to store the data later
