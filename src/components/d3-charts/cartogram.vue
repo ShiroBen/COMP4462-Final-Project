@@ -1,18 +1,24 @@
 <template>
   <div id="map-container"></div>
   <div class="filter-container">
-      <label for="filter-selector" class="filter-label">Choose Variable:</label>
-      <select id="filter-selector" v-model="selectedFeature" @change="changeVariable">
-        <option disabled value="">Select an option...</option>
-        <option value="danceability">Danceability</option>
-        <option value="liveness">Liveness</option>
-        <option value="Streams">Streams</option>
-        <option value="energy">Energy</option>
-        <option value="loudness">Loudness</option>
-        <option value="valence">Valence</option>
-        <option value="acousticness">Acousticness</option>
-      </select>
-    </div>
+    <label for="filter-selector" class="filter-label">Choose Variable:</label>
+    <select
+      id="filter-selector"
+      v-model="selectedFeature"
+      @change="changeVariable"
+    >
+      <option disabled value="">Select an option...</option>
+      <option value="danceability">Danceability</option>
+      <option value="energy">Energy</option>
+      <option value="loudness">Loudness</option>
+      <option value="speechiness">Speechiness</option>
+      <option value="acousticness">Acousticness</option>
+      <option value="instrumentalness">Instrumentalness</option>
+      <option value="liveness">Liveness</option>
+      <option value="valence">Valence</option>
+      <option value="tempo">Tempo</option>
+    </select>
+  </div>
 </template>
 
 <script>
@@ -50,10 +56,10 @@ class UnionFind {
 }
 
 export default defineComponent({
-  name: 'Cartogram',
+  name: "Cartogram",
   data() {
     return {
-      selectedFeature: "tempo", 
+      selectedFeature: "tempo",
       tempoBuckets: null, // Initialize tempoBuckets as null to store the data later
     };
   },
@@ -62,15 +68,22 @@ export default defineComponent({
   },
   methods: {
     changeVariable() {
+      this.closeMap();
       console.log("selected feature is ", this.selectedFeature);
+      this.createTempoHistogram("src/datasets/cartogram.countries.data.json");
     },
+    closeMap() {
+      // Remove the entire map container
+      d3.select("#map-container").selectAll("*").remove();
+    },
+
     createTempoHistogram(jsonPath) {
       // Load JSON data and calculate tempo buckets
       d3.json(jsonPath).then((data) => {
         // Extract all tempo values across all countries to determine the global min and max
         const allTempos = [];
-        for (const country in data.tempo) {
-          allTempos.push(...data.tempo[country]);
+        for (const country in data[this.selectedFeature]) {
+          allTempos.push(...data[this.selectedFeature][country]);
         }
         const globalMin = d3.min(allTempos);
         const globalMax = d3.max(allTempos);
@@ -81,8 +94,8 @@ export default defineComponent({
         // Prepare the histogram data for each country
         const countryBuckets = {};
 
-        for (const country in data.tempo) {
-          const countryTempos = data.tempo[country];
+        for (const country in data[this.selectedFeature]) {
+          const countryTempos = data[this.selectedFeature][country];
           const buckets = new Array(10).fill(0);
 
           // For each tempo, determine its bucket
@@ -106,7 +119,6 @@ export default defineComponent({
       });
     },
     drawMap(geojson) {
-
       const width = 800;
       const height = 500;
 
