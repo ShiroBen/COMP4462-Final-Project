@@ -6,6 +6,10 @@ Then, run:
 ```npm install```
 in root directory to install all dependencies.
 
+Then, run:
+```npm install ol```
+in root directory to install ol dependencies.
+
 Finally, you may execute command:
 ```npm run dev```
 to start a local server and enjoy our visualizations!
