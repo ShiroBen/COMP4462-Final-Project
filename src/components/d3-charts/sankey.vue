@@ -6,47 +6,46 @@
 import { defineComponent } from "vue";
 import * as d3 from "d3";
 import { geoPath, geoMercator } from "d3-geo";
-import { List } from "@element-plus/icons-vue";
+import { sankey, sankeyLinkHorizontal } from "d3-sankey";
 
 export default defineComponent({
-  name: "Sankey",
-  data() {
-    return {
-      selectedFeature: "tempo",
-      tempoBuckets: null, // Initialize tempoBuckets as null to store the data later
-    };
-  },
+  name: "SankeyMap",
   mounted() {
-    this.drawCircle();
+    this.drawMap();
   },
   methods: {
-    drawCircle() {
+    async drawMap() {
       const width = 800;
       const height = 500;
 
-      // Create an SVG container
+      // Load GeoJSON data
+      const geojson = await d3.json("src/datasets/countries.geo.json");
+
+      // Set up SVG container
       const svg = d3
         .select("#map-container")
         .append("svg")
         .attr("width", width)
         .attr("height", height);
 
-      // Create a group element to hold the circle
+      // Create a group for the map and Sankey diagram
       const g = svg.append("g");
 
-      // Circle color and initial radius
-      const circleColor = "#FF5733"; // Red-orange
-      const initialRadius = 100;
+      // Set up map projection and path generator
+      const projection = geoMercator()
+        .scale(150)
+        .translate([width / 2, height / 1.5]);
+      const path = geoPath().projection(projection);
 
-      // Draw a circle
-      g.append("circle")
-        .attr("cx", width / 2) // Center horizontally
-        .attr("cy", height / 2) // Center vertically
-        .attr("r", initialRadius)
-        .attr("fill", circleColor)
-        .attr("stroke", "#444") // Add a stroke to the circle
-        .attr("data-name", "example-circle"); // Set a unique data-name attribute
-    },
+      // Draw the map
+      g.selectAll("path")
+        .data(geojson.features)
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .attr("fill", "#dcdcdc") // Light grey for countries
+        .attr("stroke", "#888");
+    }
   },
 });
 </script>
