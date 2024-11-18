@@ -2,7 +2,7 @@
     <div class="container">
       <div class="label-container">
         <router-link to="/SpatialDV" class="label" active-class="active">Choropleth</router-link>
-        <router-link to="/sankey" class="label" active-class="active">Sankey</router-link>
+        <router-link to="/Sankey" class="label" active-class="active">Sankey</router-link>
         <router-link to="/cartogram" class="label" active-class="active">Cartogram</router-link>
       </div>
       <h1>This is Sankey</h1>
