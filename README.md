@@ -16,6 +16,9 @@ Then, to be safe run
 Sometimes the tooltip might also not load so also run:
 ```npm i d3-tip```
 
+Also, you might need to install the geo and sankey deps:
+```npm install d3-geo d3-sankey```
+
 Finally, you may execute command:
 ```npm run dev```
 to start a local server and enjoy our visualizations!
