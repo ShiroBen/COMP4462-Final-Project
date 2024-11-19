@@ -87,86 +87,7 @@ export default defineComponent({
   },
   methods: {
     isValidCountry(country) {
-      const countries = [
-        "Norway",
-        "Poland",
-        "Japan",
-        "Netherlands",
-        "Philippines",
-        "Sweden",
-        "Ukraine",
-        "United Kingdom",
-        "Switzerland",
-        "Belgium",
-        "Italy",
-        "Ireland",
-        "Finland",
-        "Canada",
-        "Australia",
-        "South Korea",
-        "Indonesia",
-        "China",
-        "Denmark",
-        "Colombia",
-        "Germany",
-        "France",
-        "Iceland",
-        "Portugal",
-        "Venezuela",
-        "Malaysia",
-        "Mexico",
-        "Puerto Rico",
-        "Spain",
-        "Argentina",
-        "Lithuania",
-        "Taiwan",
-        "Jamaica",
-        "Austria",
-        "India",
-        "Brazil",
-        "Peru",
-        "Guatemala",
-        "Romania",
-        "South Africa",
-        "Dominican Republic",
-        "Azerbaijan",
-        "Slovakia",
-        "New Zealand",
-        "Latvia",
-        "Greece",
-        "Panama",
-        "Chile",
-        "Bangladesh",
-        "Israel",
-        "Croatia",
-        "Bosnia and Herzegovina",
-        "Hungary",
-        "Russia",
-        "Angola",
-        "Democratic Republic of the Congo",
-        "Cuba",
-        "Nigeria",
-        "Estonia",
-        "Cyprus",
-        "Montenegro",
-        "Costa Rica",
-        "Slovenia",
-        "Ecuador",
-        "Uruguay",
-        "Bulgaria",
-        "Paraguay",
-        "Sierra Leone",
-        "Afghanistan",
-        "Senegal",
-        "Zimbabwe",
-        "Myanmar",
-        "Bermuda",
-        "Armenia",
-        "Lebanon",
-        "Suriname",
-        "Vietnam",
-        "Kosovo",
-      ];
+      const countries = ["Puerto Rico", "Mexico", "Venezuela", "Bosnia and Herzegovina", "Iceland", "Afghanistan", "Russia", "Armenia", "Philippines", "Spain", "Ecuador", "France", "Kosovo", "Paraguay", "Denmark", "Japan", "Brazil", "Angola", "Suriname", "Belgium", "Latvia", "Senegal", "Croatia", "Dominican Republic", "Vietnam", "Austria", "Chile", "Australia", "New Zealand", "Bulgaria", "South Africa", "Germany", "Lebanon", "Bangladesh", "Netherlands", "Cyprus", "Poland", "Finland", "Italy", "India", "China", "Israel", "Indonesia", "Costa Rica", "Montenegro", "Peru", "Uruguay", "Ireland", "Sweden", "Ukraine", "Panama", "Azerbaijan", "Democratic Republic of the Congo", "Romania", "Portugal", "Hungary", "Taiwan", "Norway", "Switzerland", "Myanmar", "Malaysia", "Guatemala", "United Kingdom", "Slovakia", "Cuba", "Argentina", "Sierra Leone", "Nigeria", "Canada", "Greece", "Colombia", "Slovenia", "Jamaica", "Zimbabwe", "Lithuania", "Estonia", "South Korea"];
       return countries.includes(country);
     },
     async loadStreamingData() {
@@ -183,7 +104,7 @@ export default defineComponent({
     },
     async drawMap() {
       const width = 800;
-      const height = 500;
+      const height = 400;
 
       // Load GeoJSON data
       const geojson = await d3.json("src/datasets/countries.geo.json");
@@ -305,7 +226,7 @@ export default defineComponent({
     },
     async plotArrows() {
       const width = 800;
-      const height = 500;
+      const height = 400;
 
       // Access the data and country colors
       const data = this.streamData;
