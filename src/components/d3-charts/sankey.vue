@@ -86,6 +86,89 @@ export default defineComponent({
       });
   },
   methods: {
+    isValidCountry(country) {
+      const countries = [
+        "Norway",
+        "Poland",
+        "Japan",
+        "Netherlands",
+        "Philippines",
+        "Sweden",
+        "Ukraine",
+        "United Kingdom",
+        "Switzerland",
+        "Belgium",
+        "Italy",
+        "Ireland",
+        "Finland",
+        "Canada",
+        "Australia",
+        "South Korea",
+        "Indonesia",
+        "China",
+        "Denmark",
+        "Colombia",
+        "Germany",
+        "France",
+        "Iceland",
+        "Portugal",
+        "Venezuela",
+        "Malaysia",
+        "Mexico",
+        "Puerto Rico",
+        "Spain",
+        "Argentina",
+        "Lithuania",
+        "Taiwan",
+        "Jamaica",
+        "Austria",
+        "India",
+        "Brazil",
+        "Peru",
+        "Guatemala",
+        "Romania",
+        "South Africa",
+        "Dominican Republic",
+        "Azerbaijan",
+        "Slovakia",
+        "New Zealand",
+        "Latvia",
+        "Greece",
+        "Panama",
+        "Chile",
+        "Bangladesh",
+        "Israel",
+        "Croatia",
+        "Bosnia and Herzegovina",
+        "Hungary",
+        "Russia",
+        "Angola",
+        "Democratic Republic of the Congo",
+        "Cuba",
+        "Nigeria",
+        "Estonia",
+        "Cyprus",
+        "Montenegro",
+        "Costa Rica",
+        "Slovenia",
+        "Ecuador",
+        "Uruguay",
+        "Bulgaria",
+        "Paraguay",
+        "Sierra Leone",
+        "Afghanistan",
+        "Senegal",
+        "Zimbabwe",
+        "Myanmar",
+        "Bermuda",
+        "Armenia",
+        "Lebanon",
+        "Suriname",
+        "Vietnam",
+        "Kosovo",
+      ];
+      return countries.includes(country);
+    },
     async loadStreamingData() {
       try {
         const data = await d3.json("src/datasets/origin-to-dest-streams.txt");
@@ -94,6 +177,9 @@ export default defineComponent({
       } catch (error) {
         console.error("Error loading streaming data:", error);
       }
+      this.validCountries = Object.keys(this.streamData);
+      console.log(this.validCountries);
+      console.log(typeof this.validCountries);
     },
     async drawMap() {
       const width = 800;
@@ -118,8 +204,21 @@ export default defineComponent({
       // Dictionary to store country centroids
       this.countryCentroids = {};
 
-      // Draw the map and calculate centroids for each country
-      // Draw the map and calculate centroids for each country
+      // Add a tooltip to the DOM
+      const tooltip = d3
+        .select("body") // Attach to the body or a parent element
+        .append("div")
+        .attr("class", "tooltip")
+        .style("position", "absolute")
+        .style("visibility", "hidden") // Initially hidden
+        .style("background-color", "rgba(0, 0, 0, 0.7)")
+        .style("color", "#fff")
+        .style("padding", "5px")
+        .style("border-radius", "3px")
+        .style("font-size", "12px");
+
+      console.log("ACTUAL TESTING", this.validCountries);
+
       svg
         .selectAll("path")
         .data(geojson.features)
@@ -135,6 +234,31 @@ export default defineComponent({
           // Calculate the centroid for each country and store it in the dictionary
           const centroid = path.centroid(d);
           this.countryCentroids[d.properties.name] = centroid; // Store centroid by country name
+        })
+        .on(
+          "mouseover",
+          function (event, d) {
+            console.log("THIS IS ", d.properties.name);
+            if (this.isValidCountry(d.properties.name)) {
+              // Show the tooltip with the country name
+              tooltip.style("visibility", "visible").text(d.properties.name); // Country name from GeoJSON properties
+
+              // Optionally, position the tooltip near the mouse pointer
+              tooltip
+                .style("top", `${event.pageY + 10}px`) // Adjust positioning
+                .style("left", `${event.pageX + 10}px`);
+            }
+          }.bind(this)
+        )
+        .on("mousemove", function (event) {
+          // Update the tooltip position as the mouse moves
+          tooltip
+            .style("top", `${event.pageY + 10}px`)
+            .style("left", `${event.pageX + 10}px`);
+        })
+        .on("mouseout", function () {
+          // Hide the tooltip when mouse leaves the country
+          tooltip.style("visibility", "hidden");
         });
 
       // Save projection and path for later use in plotCountries
@@ -148,7 +272,6 @@ export default defineComponent({
 
       // Select only countries listed as keys in streamData
       const countryNames = Object.keys(this.streamData);
-
     },
     async calculateArrowSizes() {
       // Access the stream data
