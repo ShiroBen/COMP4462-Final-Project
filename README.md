@@ -25,3 +25,4 @@ The data is too big therefore, we have put in Google Drive. Google Drive: https:
 For task 1 , the original Observable Notebook links are as below:
 Scatter Plot: https://observablehq.com/d/85ab1b5459c1bc05
 Radar Chart: https://observablehq.com/d/c3189374362b7fcb
+Bar Chart: https://observablehq.com/d/66ebda84a4824705
