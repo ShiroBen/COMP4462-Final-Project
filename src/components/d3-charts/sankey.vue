@@ -79,7 +79,7 @@ export default defineComponent({
       .then(() => this.drawMap())
       .then(() => {
         this.plotCountries();
-        this.plotArrows();
+        this.calculateArrowSizes().then(() => this.plotArrows());
       });
   },
   methods: {
@@ -159,19 +159,12 @@ export default defineComponent({
         .attr("stroke", "black")
         .attr("stroke-width", 0.5);
     },
-    async plotArrows() {
-      const width = 800;
-      const height = 500;
-
-      // Access the data and country colors
+    async calculateArrowSizes() {
+      // Access the stream data
       const data = this.streamData;
-      const countryColors = this.countryColours;
 
-      // Set up the SVG container if it doesn't exist yet
-      const svg = this.svg;
-      console.log("svg is ", svg);
-
-      console.log("data is ", data);
+      // Object to store the arrow sizes
+      this.arrowSizes = {};
 
       // Iterate over each pair of countries in the data
       for (let origin in data) {
@@ -182,17 +175,55 @@ export default defineComponent({
           // Skip if there are no streams
           if (streams === 0) continue;
 
-          // Get the centroid of the origin and destination countries (simplified approach)
+          // Calculate the arrow size (adjust the scale as needed)
+          //const arrowSize = Math.sqrt(streams) * 2; // Arbitrary scaling factor
+          const arrowSize = 2;
+
+          // Store the arrow size in the object
+          if (!this.arrowSizes[origin]) {
+            this.arrowSizes[origin] = {};
+          }
+          this.arrowSizes[origin][destination] = arrowSize;
+        }
+      }
+
+      console.log("Arrow Sizes Calculated:", this.arrowSizes);
+    },
+    async plotArrows() {
+      const width = 800;
+      const height = 500;
+
+      // Access the data and country colors
+      const data = this.streamData;
+      const countryColors = this.countryColours;
+
+      // Set up the SVG container if it doesn't exist yet
+      const svg = this.svg;
+
+      // Iterate over each pair of countries in the data
+      for (let origin in data) {
+        for (let destination in data[origin]) {
+          // Get the number of streams, assume 0 if missing
+          const streams = data[origin][destination] || 0;
+
+          // Skip if there are no streams
+          if (streams === 0) continue;
+
+          // Get the centroid of the origin and destination countries
           const originCountry = this.getCountryCentroid(origin);
           const destinationCountry = this.getCountryCentroid(destination);
 
           // Skip if centroids are missing
           if (!originCountry || !destinationCountry) continue;
 
-          // Define the arrow size based on the number of streams
-          //const arrowSize = Math.sqrt(streams) * 2; // Arbitrary scaling factor
-          const arrowSize = 10;
+          // Retrieve the arrow size from the precalculated arrow sizes
+          const arrowSize =
+            (this.arrowSizes[origin] && this.arrowSizes[origin][destination]) ||
+            0; // Default to 10 if missing
 
+          if (arrowSize == 0) {
+            continue;
+          }
           // Draw the arrow
           svg
             .append("line")
