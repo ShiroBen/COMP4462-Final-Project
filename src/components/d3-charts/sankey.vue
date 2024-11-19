@@ -1,31 +1,33 @@
 <template>
   <div class="container">
-  <div class="left"> <div id="map-container"></div></div>
-  <div class="right">
-    <div class="top-right"><div class="slider-container">
-    <label for="bucketCount">Bucket Count: {{ bucketCount }}</label>
-    <input
-      type="range"
-      id="bucketCount"
-      min="1"
-      max="100"
-      v-model="bucketCount"
-    />
-  </div></div>
-    <div class="bottom-right"><div class="slider-container">
-    <label for="arrowSize">Arrow Size: {{ arrowSize }}</label>
-    <input
-      type="range"
-      id="arrowSize"
-      min="1"
-      max="30"
-      v-model="arrowSize"
-    />
-  </div></div>
+    <div class="left"><div id="map-container"></div></div>
+    <div class="right">
+      <div class="top-right">
+        <div class="slider-container">
+          <label for="bucketCount">Bucket Count: {{ bucketCount }}</label>
+          <input
+            type="range"
+            id="bucketCount"
+            min="1"
+            max="100"
+            v-model="bucketCount"
+          />
+        </div>
+      </div>
+      <div class="bottom-right">
+        <div class="slider-container">
+          <label for="arrowSize">Arrow Size: {{ arrowSize }}</label>
+          <input
+            type="range"
+            id="arrowSize"
+            min="1"
+            max="30"
+            v-model="arrowSize"
+          />
+        </div>
+      </div>
+    </div>
   </div>
-</div>
-
-
 </template>
 
 <style scoped>
@@ -45,7 +47,6 @@ label {
   margin-bottom: 5px;
   text-align: center;
 }
-
 
 /* Style slider input */
 input[type="range"] {
@@ -93,9 +94,7 @@ input[type="range"]::-moz-range-thumb {
 .bottom-right {
   /* Styles for right elements */
 }
-
 </style>
-
 
 <script>
 import { defineComponent } from "vue";
@@ -436,14 +435,17 @@ export default defineComponent({
 
       // Iterate over each pair of countries in the data
       for (let origin in data) {
-        if (this.clicked != null && this.clicked != origin) {
-          continue;
-        }
-
         for (let destination in data[origin]) {
+          if (
+            this.clicked != null &&
+            this.clicked != origin &&
+            this.clicked != destination
+          ) {
+            continue;
+          }
+
           // Get the number of streams, assume 0 if missing
           const streams = data[origin][destination] || 0;
-
 
           // Skip if there are no streams
           if (streams === 0) continue;
