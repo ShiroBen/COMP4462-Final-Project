@@ -227,7 +227,6 @@ export default defineComponent({
         .style("border-radius", "3px")
         .style("font-size", "12px");
 
-
       svg
         .selectAll("path")
         .data(geojson.features)
@@ -268,7 +267,27 @@ export default defineComponent({
         .on("mouseout", function () {
           // Hide the tooltip when mouse leaves the country
           tooltip.style("visibility", "hidden");
-        });
+        })
+        .on(
+          "click",
+          function (event, d) {
+            // Toggle clicked state for the country
+            const countryName = d.properties.name;
+            if (this.clicked === countryName) {
+              // If already clicked, unclick by setting this.clicked to null
+              this.clicked = null;
+            } else {
+              // Otherwise, store the country name in this.clicked
+              this.clicked = countryName;
+            }
+
+            // Optionally log the current clicked country or handle additional logic here
+            console.log("Clicked country:", this.clicked);
+
+            this.clearArrowLines();
+            this.calculateArrowSizes().then(() => this.plotArrows());
+          }.bind(this)
+        );
 
       // Save projection and path for later use in plotCountries
       this.projection = projection;
@@ -302,7 +321,10 @@ export default defineComponent({
 
           // Calculate the arrow size (adjust the scale as needed)
           //const arrowSize = Math.sqrt(streams) * 2; // Arbitrary scaling factor
-          const arrowSize = Math.round(streams / chunk_size) / this.bucketCount * 10 * this.arrowSize;
+          const arrowSize =
+            (Math.round(streams / chunk_size) / this.bucketCount) *
+            10 *
+            this.arrowSize;
 
           // Store the arrow size in the object
           if (!this.arrowSizes[origin]) {
@@ -311,7 +333,6 @@ export default defineComponent({
           this.arrowSizes[origin][destination] = arrowSize;
         }
       }
-
     },
     async plotArrows() {
       const width = 800;
@@ -326,9 +347,17 @@ export default defineComponent({
 
       // Iterate over each pair of countries in the data
       for (let origin in data) {
+        if (this.clicked != null && this.clicked != origin) {
+          console.log("SKIPPING ORIGIN ", origin);
+          continue;
+        }
+        console.log("PLOTTING ", origin);
+
         for (let destination in data[origin]) {
           // Get the number of streams, assume 0 if missing
           const streams = data[origin][destination] || 0;
+
+          console.log(origin , " has " , streams);
 
           // Skip if there are no streams
           if (streams === 0) continue;
