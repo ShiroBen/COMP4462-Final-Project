@@ -1,8 +1,101 @@
 <template>
-  <div id="map-container"></div>
-  <input type="range" min="1" max="100" v-model="bucketCount" />
-  <input type="range" min="1" max="30" v-model="arrowSize" />
+  <div class="container">
+  <div class="left"> <div id="map-container"></div></div>
+  <div class="right">
+    <div class="top-right"><div class="slider-container">
+    <label for="bucketCount">Bucket Count: {{ bucketCount }}</label>
+    <input
+      type="range"
+      id="bucketCount"
+      min="1"
+      max="100"
+      v-model="bucketCount"
+    />
+  </div></div>
+    <div class="bottom-right"><div class="slider-container">
+    <label for="arrowSize">Arrow Size: {{ arrowSize }}</label>
+    <input
+      type="range"
+      id="arrowSize"
+      min="1"
+      max="30"
+      v-model="arrowSize"
+    />
+  </div></div>
+  </div>
+</div>
+
+
 </template>
+
+<style scoped>
+/* Arrange sliders in a vertical layout */
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin: 30px 0;
+  margin-left: 20px;
+}
+
+/* Style label to center-align it with the slider */
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+
+/* Style slider input */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 170px;
+  height: 8px;
+  background: #ddd;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  background-color: #007bff;
+  border-radius: 50%;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  background-color: #007bff;
+  border-radius: 50%;
+}
+
+.container {
+  display: flex;
+}
+
+.left {
+  flex: 1;
+  /* Adjust width if needed */
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.top-right,
+.bottom-right {
+  /* Styles for right elements */
+}
+
+</style>
+
 
 <script>
 import { defineComponent } from "vue";
