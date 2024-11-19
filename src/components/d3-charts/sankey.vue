@@ -246,7 +246,6 @@ export default defineComponent({
         .on(
           "mouseover",
           function (event, d) {
-            console.log("THIS IS ", d.properties.name);
             if (this.isValidCountry(d.properties.name)) {
               // Show the tooltip with the country name
               tooltip.style("visibility", "visible").text(d.properties.name); // Country name from GeoJSON properties
@@ -280,9 +279,6 @@ export default defineComponent({
               // Otherwise, store the country name in this.clicked
               this.clicked = countryName;
             }
-
-            // Optionally log the current clicked country or handle additional logic here
-            console.log("Clicked country:", this.clicked);
 
             this.clearArrowLines();
             this.calculateArrowSizes().then(() => this.plotArrows());
@@ -348,16 +344,13 @@ export default defineComponent({
       // Iterate over each pair of countries in the data
       for (let origin in data) {
         if (this.clicked != null && this.clicked != origin) {
-          console.log("SKIPPING ORIGIN ", origin);
           continue;
         }
-        console.log("PLOTTING ", origin);
 
         for (let destination in data[origin]) {
           // Get the number of streams, assume 0 if missing
           const streams = data[origin][destination] || 0;
 
-          console.log(origin , " has " , streams);
 
           // Skip if there are no streams
           if (streams === 0) continue;
