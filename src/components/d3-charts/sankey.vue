@@ -21,7 +21,7 @@
             type="range"
             id="arrowSize"
             min="1"
-            max="30"
+            max="60"
             v-model="arrowSize"
           />
         </div>
