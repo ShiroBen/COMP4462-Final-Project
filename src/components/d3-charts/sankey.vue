@@ -108,61 +108,85 @@ export default defineComponent({
   computed: {
     countryColours() {
       return {
-        Lithuania: "#FF5733", // Red-orange
-        Latvia: "#33FF57", // Green
-        Germany: "#3357FF", // Blue
-        France: "#F1C40F", // Yellow
-        Ireland: "#FF6347", // Tomato
-        Japan: "#8A2BE2", // Blue violet
-        Philippines: "#FFD700", // Gold
-        India: "#FF1493", // Deep pink
-        Guatemala: "#00FA9A", // Medium spring green
-        Canada: "#00BFFF", // Deep sky blue
-        "Costa Rica": "#FF4500", // Orange red
-        "United Kingdom": "#DA70D6", // Orchid
-        "United States of America": "#ADFF2F", // Green yellow
-        Malaysia: "#20B2AA", // Light sea green
-        Bolivia: "#D2691E", // Chocolate
-        Italy: "#FF4500", // Orange red
-        Mexico: "#32CD32", // Lime green
-        Colombia: "#C71585", // Medium violet red
-        Netherlands: "#DC143C", // Crimson
-        Brazil: "#228B22", // Forest green
-        Norway: "#8B0000", // Dark red
-        Ecuador: "#FFFF00", // Yellow
-        Iceland: "#00CED1", // Dark turquoise
-        Greece: "#4682B4", // Steel blue
-        Estonia: "#FF8C00", // Dark orange
-        Sweden: "#C71585", // Medium violet red
-        Australia: "#32CD32", // Lime green
-        Taiwan: "#FFD700", // Gold
-        Denmark: "#B22222", // Firebrick
-        "Dominican Republic": "#F0E68C", // Khaki
-        Turkey: "#FF6347", // Tomato
-        Hungary: "#FF69B4", // Hot pink
-        "El Salvador": "#6A5ACD", // Slate blue
-        Honduras: "#FF8C00", // Dark orange
-        Belgium: "#800080", // Purple
-        "South Korea": "#3CB371", // Medium sea green
-        Austria: "#B0C4DE", // Light steel blue
-        Uruguay: "#FFD700", // Gold
-        Panama: "#C0C0C0", // Silver
-        Spain: "#FF6347", // Tomato
-        Finland: "#00008B", // Dark blue
-        Paraguay: "#8B4513", // Saddle brown
-        Peru: "#D2691E", // Chocolate
-        Luxembourg: "#A52A2A", // Brown
-        Chile: "#D3D3D3", // Light grey
-        "New Zealand": "#FF1493", // Deep pink
-        Portugal: "#8A2BE2", // Blue violet
-        "Czech Republic": "#4682B4", // Steel blue
-        China: "#DC143C", // Crimson
-        Poland: "#FF4500", // Orange red
-        Argentina: "#2E8B57", // Sea green
+        Afghanistan: "#FF5733", // Bright Orange
+        Angola: "#33FF57", // Bright Green
+        Argentina: "#3357FF", // Bright Blue
+        Armenia: "#FF33A1", // Bright Pink
+        Australia: "#33FFF5", // Bright Cyan
+        Austria: "#FF33FF", // Bright Magenta
+        Azerbaijan: "#FF8C33", // Bright Orange-Red
+        Belgium: "#33FF8C", // Bright Mint
+        Brazil: "#33A1FF", // Light Blue
+        Canada: "#FF3333", // Bright Red
+        Chile: "#33FF33", // Bright Lime
+        China: "#FF5733", // Bright Orange
+        Colombia: "#33FF57", // Bright Green
+        "Costa Rica": "#3357FF", // Bright Blue
+        Croatia: "#FF33A1", // Bright Pink
+        Cuba: "#33FFF5", // Bright Cyan
+        Cyprus: "#FF33FF", // Bright Magenta
+        "Côte d'Ivoire": "#FF8C33", // Bright Orange-Red
+        Denmark: "#33FF8C", // Bright Mint
+        Ecuador: "#33A1FF", // Light Blue
+        Estonia: "#FF3333", // Bright Red
+        Finland: "#33FF33", // Bright Lime
+        France: "#FF5733", // Bright Orange
+        Germany: "#33FF57", // Bright Green
+        Greece: "#3357FF", // Bright Blue
+        Guatemala: "#FF33A1", // Bright Pink
+        Hungary: "#33FFF5", // Bright Cyan
+        Iceland: "#FF33FF", // Bright Magenta
+        India: "#FF8C33", // Bright Orange-Red
+        Indonesia: "#33FF8C", // Bright Mint
+        Iraq: "#33A1FF", // Light Blue
+        Ireland: "#FF3333", // Bright Red
+        Israel: "#33FF33", // Bright Lime
+        Italy: "#FF5733", // Bright Orange
+        Jamaica: "#33FF57", // Bright Green
+        Japan: "#3357FF", // Bright Blue
+        Kosovo: "#FF33A1", // Bright Pink
+        Latvia: "#33FFF5", // Bright Cyan
+        Lithuania: "#FF33FF", // Bright Magenta
+        Malaysia: "#FF8C33", // Bright Orange-Red
+        Mali: "#33FF8C", // Bright Mint
+        Mexico: "#33A1FF", // Light Blue
+        Moldova: "#FF3333", // Bright Red
+        Montenegro: "#33FF33", // Bright Lime
+        Netherlands: "#FF5733", // Bright Orange
+        "New Zealand": "#33FF57", // Bright Green
+        Nicaragua: "#3357FF", // Bright Blue
+        Nigeria: "#FF33A1", // Bright Pink
+        "North Macedonia": "#33FFF5", // Bright Cyan
+        Norway: "#FF33FF", // Bright Magenta
+        Panama: "#FF8C33", // Bright Orange-Red
+        Paraguay: "#33FF8C", // Bright Mint
+        Peru: "#33A1FF", // Light Blue
+        Philippines: "#FF3333", // Bright Red
+        Poland: "#33FF33", // Bright Lime
+        Portugal: "#FF5733", // Bright Orange
+        Romania: "#33FF57", // Bright Green
+        Russia: "#3357FF", // Bright Blue
+        Senegal: "#FF33A1", // Bright Pink
+        Slovakia: "#33FFF5", // Bright Cyan
+        Slovenia: "#FF33FF", // Bright Magenta
+        "South Africa": "#FF8C33", // Bright Orange-Red
+        "South Korea": "#33FF8C", // Bright Mint
+        Spain: "#33A1FF", // Light Blue
+        Suriname: "#FF3333", // Bright Red
+        Sweden: "#33FF33", // Bright Lime
+        Switzerland: "#FF5733", // Bright Orange
+        Taiwan: "#33FF57", // Bright Green
+        Thailand: "#3357FF", // Bright Blue
+        Turkey: "#FF33A1", // Bright Pink
+        Ukraine: "#33FFF5", // Bright Cyan
+        "United Kingdom": "#FF33FF", // Bright Magenta
+        "United States": "#FF8C33", // Bright Orange-Red
+        Uruguay: "#33FF8C", // Bright Mint
+        Venezuela: "#33A1FF", // Light Blue
       };
     },
     maxStreams() {
-      return 8752070076;
+      return 18174185977;
     },
   },
   watch: {
@@ -193,89 +217,87 @@ export default defineComponent({
   methods: {
     isValidCountry(country) {
       const countries = [
-        "Puerto Rico",
-        "Mexico",
-        "Venezuela",
-        "Bosnia and Herzegovina",
-        "Iceland",
         "Afghanistan",
-        "Russia",
-        "Armenia",
-        "Philippines",
-        "Spain",
-        "Ecuador",
-        "France",
-        "Kosovo",
-        "Paraguay",
-        "Denmark",
-        "Japan",
-        "Brazil",
         "Angola",
-        "Suriname",
-        "Belgium",
-        "Latvia",
-        "Senegal",
-        "Croatia",
-        "Dominican Republic",
-        "Vietnam",
-        "Austria",
-        "Chile",
-        "Australia",
-        "New Zealand",
-        "Bulgaria",
-        "South Africa",
-        "Germany",
-        "Lebanon",
-        "Bangladesh",
-        "Netherlands",
-        "Cyprus",
-        "Poland",
-        "Finland",
-        "Italy",
-        "India",
-        "China",
-        "Israel",
-        "Indonesia",
-        "Costa Rica",
-        "Montenegro",
-        "Peru",
-        "Uruguay",
-        "Ireland",
-        "Sweden",
-        "Ukraine",
-        "Panama",
-        "Azerbaijan",
-        "Democratic Republic of the Congo",
-        "Romania",
-        "Portugal",
-        "Hungary",
-        "Taiwan",
-        "Norway",
-        "Switzerland",
-        "Myanmar",
-        "Malaysia",
-        "Guatemala",
-        "United Kingdom",
-        "Slovakia",
-        "Cuba",
         "Argentina",
-        "Sierra Leone",
-        "Nigeria",
+        "Armenia",
+        "Australia",
+        "Austria",
+        "Azerbaijan",
+        "Belgium",
+        "Brazil",
         "Canada",
-        "Greece",
+        "Chile",
+        "China",
         "Colombia",
-        "Slovenia",
-        "Jamaica",
-        "Zimbabwe",
-        "Lithuania",
+        "Costa Rica",
+        "Croatia",
+        "Cuba",
+        "Cyprus",
+        "Côte d'Ivoire",
+        "Denmark",
+        "Ecuador",
         "Estonia",
+        "Finland",
+        "France",
+        "Germany",
+        "Greece",
+        "Guatemala",
+        "Hungary",
+        "Iceland",
+        "India",
+        "Indonesia",
+        "Iraq",
+        "Ireland",
+        "Israel",
+        "Italy",
+        "Jamaica",
+        "Japan",
+        "Kosovo",
+        "Latvia",
+        "Lithuania",
+        "Malaysia",
+        "Mali",
+        "Mexico",
+        "Moldova",
+        "Montenegro",
+        "Netherlands",
+        "New Zealand",
+        "Nicaragua",
+        "Nigeria",
+        "North Macedonia",
+        "Norway",
+        "Panama",
+        "Paraguay",
+        "Peru",
+        "Philippines",
+        "Poland",
+        "Portugal",
+        "Romania",
+        "Russia",
+        "Senegal",
+        "Slovakia",
+        "Slovenia",
+        "South Africa",
         "South Korea",
+        "Spain",
+        "Suriname",
+        "Sweden",
+        "Switzerland",
+        "Taiwan",
+        "Thailand",
+        "Turkey",
+        "Ukraine",
+        "United Kingdom",
+        "United States",
+        "Uruguay",
+        "Venezuela",
       ];
       return countries.includes(country);
     },
     async loadStreamingData() {
       try {
-        const data = await d3.json("src/datasets/origin-to-dest-streams.txt");
+        const data = await d3.json("src/datasets/country_to_country.json");
         this.streamData = data;
         console.log("Streaming data loaded:", this.streamData);
       } catch (error) {
