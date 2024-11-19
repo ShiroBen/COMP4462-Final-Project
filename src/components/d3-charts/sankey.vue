@@ -1,5 +1,7 @@
 <template>
   <div id="map-container"></div>
+  <input type="range" min="1" max="100" v-model="bucketCount" />
+  <input type="range" min="1" max="30" v-model="arrowSize" />
 </template>
 
 <script>
@@ -10,6 +12,7 @@ import { sankey, sankeyLinkHorizontal } from "d3-sankey";
 
 export default defineComponent({
   name: "SankeyMap",
+
   computed: {
     countryColours() {
       return {
@@ -70,14 +73,24 @@ export default defineComponent({
       return 8752070076;
     },
   },
+  watch: {
+    bucketCount() {
+      this.clearArrowLines();
+      this.calculateArrowSizes().then(() => this.plotArrows());
+    },
+    arrowSize() {
+      this.clearArrowLines();
+      this.calculateArrowSizes().then(() => this.plotArrows());
+    },
+  },
   data() {
     return {
       streamData: {}, // Store loaded data here
+      arrowSize: 10,
+      bucketCount: 10,
     };
   },
   mounted() {
-    console.log("HELLO WORLD");
-    console.log(this.countryColours);
     this.loadStreamingData()
       .then(() => this.drawMap())
       .then(() => {
@@ -87,7 +100,85 @@ export default defineComponent({
   },
   methods: {
     isValidCountry(country) {
-      const countries = ["Puerto Rico", "Mexico", "Venezuela", "Bosnia and Herzegovina", "Iceland", "Afghanistan", "Russia", "Armenia", "Philippines", "Spain", "Ecuador", "France", "Kosovo", "Paraguay", "Denmark", "Japan", "Brazil", "Angola", "Suriname", "Belgium", "Latvia", "Senegal", "Croatia", "Dominican Republic", "Vietnam", "Austria", "Chile", "Australia", "New Zealand", "Bulgaria", "South Africa", "Germany", "Lebanon", "Bangladesh", "Netherlands", "Cyprus", "Poland", "Finland", "Italy", "India", "China", "Israel", "Indonesia", "Costa Rica", "Montenegro", "Peru", "Uruguay", "Ireland", "Sweden", "Ukraine", "Panama", "Azerbaijan", "Democratic Republic of the Congo", "Romania", "Portugal", "Hungary", "Taiwan", "Norway", "Switzerland", "Myanmar", "Malaysia", "Guatemala", "United Kingdom", "Slovakia", "Cuba", "Argentina", "Sierra Leone", "Nigeria", "Canada", "Greece", "Colombia", "Slovenia", "Jamaica", "Zimbabwe", "Lithuania", "Estonia", "South Korea"];
+      const countries = [
+        "Puerto Rico",
+        "Mexico",
+        "Venezuela",
+        "Bosnia and Herzegovina",
+        "Iceland",
+        "Afghanistan",
+        "Russia",
+        "Armenia",
+        "Philippines",
+        "Spain",
+        "Ecuador",
+        "France",
+        "Kosovo",
+        "Paraguay",
+        "Denmark",
+        "Japan",
+        "Brazil",
+        "Angola",
+        "Suriname",
+        "Belgium",
+        "Latvia",
+        "Senegal",
+        "Croatia",
+        "Dominican Republic",
+        "Vietnam",
+        "Austria",
+        "Chile",
+        "Australia",
+        "New Zealand",
+        "Bulgaria",
+        "South Africa",
+        "Germany",
+        "Lebanon",
+        "Bangladesh",
+        "Netherlands",
+        "Cyprus",
+        "Poland",
+        "Finland",
+        "Italy",
+        "India",
+        "China",
+        "Israel",
+        "Indonesia",
+        "Costa Rica",
+        "Montenegro",
+        "Peru",
+        "Uruguay",
+        "Ireland",
+        "Sweden",
+        "Ukraine",
+        "Panama",
+        "Azerbaijan",
+        "Democratic Republic of the Congo",
+        "Romania",
+        "Portugal",
+        "Hungary",
+        "Taiwan",
+        "Norway",
+        "Switzerland",
+        "Myanmar",
+        "Malaysia",
+        "Guatemala",
+        "United Kingdom",
+        "Slovakia",
+        "Cuba",
+        "Argentina",
+        "Sierra Leone",
+        "Nigeria",
+        "Canada",
+        "Greece",
+        "Colombia",
+        "Slovenia",
+        "Jamaica",
+        "Zimbabwe",
+        "Lithuania",
+        "Estonia",
+        "South Korea",
+      ];
       return countries.includes(country);
     },
     async loadStreamingData() {
@@ -99,8 +190,6 @@ export default defineComponent({
         console.error("Error loading streaming data:", error);
       }
       this.validCountries = Object.keys(this.streamData);
-      console.log(this.validCountries);
-      console.log(typeof this.validCountries);
     },
     async drawMap() {
       const width = 800;
@@ -138,7 +227,6 @@ export default defineComponent({
         .style("border-radius", "3px")
         .style("font-size", "12px");
 
-      console.log("ACTUAL TESTING", this.validCountries);
 
       svg
         .selectAll("path")
@@ -198,6 +286,8 @@ export default defineComponent({
       // Access the stream data
       const data = this.streamData;
 
+      const chunk_size = this.maxStreams / this.bucketCount;
+
       // Object to store the arrow sizes
       this.arrowSizes = {};
 
@@ -212,7 +302,7 @@ export default defineComponent({
 
           // Calculate the arrow size (adjust the scale as needed)
           //const arrowSize = Math.sqrt(streams) * 2; // Arbitrary scaling factor
-          const arrowSize = Math.round((streams / this.maxStreams) * 40);
+          const arrowSize = Math.round(streams / chunk_size) / this.bucketCount * 10 * this.arrowSize;
 
           // Store the arrow size in the object
           if (!this.arrowSizes[origin]) {
@@ -222,7 +312,6 @@ export default defineComponent({
         }
       }
 
-      console.log("Arrow Sizes Calculated:", this.arrowSizes);
     },
     async plotArrows() {
       const width = 800;
@@ -262,6 +351,7 @@ export default defineComponent({
           // Draw the arrow
           svg
             .append("line")
+            .attr("class", "arrow-line")
             .attr("x1", originCountry[0])
             .attr("y1", originCountry[1])
             .attr("x2", destinationCountry[0])
@@ -272,6 +362,9 @@ export default defineComponent({
             .attr("opacity", 0.6);
         }
       }
+    },
+    clearArrowLines() {
+      d3.selectAll(".arrow-line").remove();
     },
 
     // Helper method to get the centroid of a country (simplified approach)
