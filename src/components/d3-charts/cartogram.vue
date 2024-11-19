@@ -65,13 +65,29 @@ export default defineComponent({
     };
   },
   mounted() {
-    this.createTempoHistogram("src/datasets/cartogram.countries.updated.data.json"); // Call with the JSON path
+    this.tooltip = d3
+        .select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("position", "absolute")
+        .style("visibility", "hidden") // Initially hidden
+        .style("background-color", "rgba(0, 0, 0, 0.7)")
+        .style("color", "#fff")
+        .style("padding", "5px")
+        .style("border-radius", "3px")
+        .style("font-size", "12px");
+
+    this.createTempoHistogram(
+      "src/datasets/cartogram.countries.updated.data.json"
+    ); // Call with the JSON path
   },
   methods: {
     changeVariable() {
       this.closeMap();
       console.log("selected feature is ", this.selectedFeature);
-      this.createTempoHistogram("src/datasets/cartogram.countries.updated.data.json");
+      this.createTempoHistogram(
+        "src/datasets/cartogram.countries.updated.data.json"
+      );
     },
     closeMap() {
       // Remove the entire map container
@@ -137,52 +153,52 @@ export default defineComponent({
       const defaultColor = "#dcdcdc"; // Grey color for countries not in the dictionary
 
       const countryColors = {
-    'Argentina': '#FF5733',    // Bright Orange
-    'Australia': '#33FF57',    // Bright Green
-    'Austria': '#3357FF',      // Bright Blue
-    'Belgium': '#FF33A1',      // Bright Pink
-    'Brazil': '#33FFF5',       // Bright Cyan
-    'Canada': '#FF33FF',       // Bright Magenta
-    'Chile': '#FF8C33',        // Bright Orange-Red
-    'China': '#33FF8C',        // Bright Mint
-    'Colombia': '#33A1FF',     // Light Blue
-    'Costa Rica': '#FF3333',   // Bright Red
-    'Denmark': '#33FF33',      // Bright Lime
-    'Ecuador': '#FF5733',      // Bright Orange
-    'Estonia': '#33FF57',      // Bright Green
-    'Finland': '#3357FF',      // Bright Blue
-    'France': '#FF33A1',       // Bright Pink
-    'Germany': '#33FFF5',      // Bright Cyan
-    'Greece': '#FF33FF',       // Bright Magenta
-    'Guatemala': '#FF8C33',    // Bright Orange-Red
-    'Hungary': '#33FF8C',      // Bright Mint
-    'Iceland': '#33A1FF',      // Light Blue
-    'India': '#FF3333',        // Bright Red
-    'Ireland': '#33FF33',      // Bright Lime
-    'Italy': '#FF5733',        // Bright Orange
-    'Japan': '#33FF57',        // Bright Green
-    'Latvia': '#3357FF',       // Bright Blue
-    'Lithuania': '#FF33A1',    // Bright Pink
-    'Malaysia': '#33FFF5',     // Bright Cyan
-    'Mexico': '#FF33FF',       // Bright Magenta
-    'Netherlands': '#FF8C33',  // Bright Orange-Red
-    'New Zealand': '#33FF8C',  // Bright Mint
-    'Norway': '#33A1FF',       // Light Blue
-    'Panama': '#FF3333',       // Bright Red
-    'Paraguay': '#33FF33',     // Bright Lime
-    'Peru': '#FF5733',         // Bright Orange
-    'Philippines': '#33FF57',  // Bright Green
-    'Poland': '#3357FF',       // Bright Blue
-    'Portugal': '#FF33A1',     // Bright Pink
-    'South Korea': '#33FFF5',  // Bright Cyan
-    'Spain': '#FF33FF',        // Bright Magenta
-    'Sweden': '#FF8C33',       // Bright Orange-Red
-    'Taiwan': '#33FF8C',       // Bright Mint
-    'Turkey': '#33A1FF',       // Light Blue
-    'United Kingdom': '#FF3333',// Bright Red
-    'United States': '#33FF33',// Bright Lime
-    'Uruguay': '#FF5733'       // Bright Orange
-}
+        Argentina: "#FF5733", // Bright Orange
+        Australia: "#33FF57", // Bright Green
+        Austria: "#3357FF", // Bright Blue
+        Belgium: "#FF33A1", // Bright Pink
+        Brazil: "#33FFF5", // Bright Cyan
+        Canada: "#FF33FF", // Bright Magenta
+        Chile: "#FF8C33", // Bright Orange-Red
+        China: "#33FF8C", // Bright Mint
+        Colombia: "#33A1FF", // Light Blue
+        "Costa Rica": "#FF3333", // Bright Red
+        Denmark: "#33FF33", // Bright Lime
+        Ecuador: "#FF5733", // Bright Orange
+        Estonia: "#33FF57", // Bright Green
+        Finland: "#3357FF", // Bright Blue
+        France: "#FF33A1", // Bright Pink
+        Germany: "#33FFF5", // Bright Cyan
+        Greece: "#FF33FF", // Bright Magenta
+        Guatemala: "#FF8C33", // Bright Orange-Red
+        Hungary: "#33FF8C", // Bright Mint
+        Iceland: "#33A1FF", // Light Blue
+        India: "#FF3333", // Bright Red
+        Ireland: "#33FF33", // Bright Lime
+        Italy: "#FF5733", // Bright Orange
+        Japan: "#33FF57", // Bright Green
+        Latvia: "#3357FF", // Bright Blue
+        Lithuania: "#FF33A1", // Bright Pink
+        Malaysia: "#33FFF5", // Bright Cyan
+        Mexico: "#FF33FF", // Bright Magenta
+        Netherlands: "#FF8C33", // Bright Orange-Red
+        "New Zealand": "#33FF8C", // Bright Mint
+        Norway: "#33A1FF", // Light Blue
+        Panama: "#FF3333", // Bright Red
+        Paraguay: "#33FF33", // Bright Lime
+        Peru: "#FF5733", // Bright Orange
+        Philippines: "#33FF57", // Bright Green
+        Poland: "#3357FF", // Bright Blue
+        Portugal: "#FF33A1", // Bright Pink
+        "South Korea": "#33FFF5", // Bright Cyan
+        Spain: "#FF33FF", // Bright Magenta
+        Sweden: "#FF8C33", // Bright Orange-Red
+        Taiwan: "#33FF8C", // Bright Mint
+        Turkey: "#33A1FF", // Light Blue
+        "United Kingdom": "#FF3333", // Bright Red
+        "United States": "#33FF33", // Bright Lime
+        Uruguay: "#FF5733", // Bright Orange
+      };
 
       // Set up a projection and path generator
       const projection = d3
@@ -237,7 +253,60 @@ export default defineComponent({
     },
 
     updateBubbles(geojson, svg, pathGenerator, zoomLevel) {
-      const countriesThatAreInDataset = ['Argentina', 'Australia', 'Austria', 'Belgium', 'Brazil', 'Canada', 'Chile', 'China', 'Colombia', 'Costa Rica', 'Denmark', 'Ecuador', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Guatemala', 'Hungary', 'Iceland', 'India', 'Ireland', 'Italy', 'Japan', 'Latvia', 'Lithuania', 'Malaysia', 'Mexico', 'Netherlands', 'New Zealand', 'Norway', 'Panama', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'South Korea', 'Spain', 'Sweden', 'Taiwan', 'Turkey', 'United Kingdom', 'United States', 'Uruguay'];
+      const tooltip = this.tooltip;
+      tooltip.style("visibility", "hidden");
+
+      // Add a tooltip to the DOM
+      svg.selectAll(".tooltip-circle").remove();
+      
+
+      const countriesThatAreInDataset = [
+        "Argentina",
+        "Australia",
+        "Austria",
+        "Belgium",
+        "Brazil",
+        "Canada",
+        "Chile",
+        "China",
+        "Colombia",
+        "Costa Rica",
+        "Denmark",
+        "Ecuador",
+        "Estonia",
+        "Finland",
+        "France",
+        "Germany",
+        "Greece",
+        "Guatemala",
+        "Hungary",
+        "Iceland",
+        "India",
+        "Ireland",
+        "Italy",
+        "Japan",
+        "Latvia",
+        "Lithuania",
+        "Malaysia",
+        "Mexico",
+        "Netherlands",
+        "New Zealand",
+        "Norway",
+        "Panama",
+        "Paraguay",
+        "Peru",
+        "Philippines",
+        "Poland",
+        "Portugal",
+        "South Korea",
+        "Spain",
+        "Sweden",
+        "Taiwan",
+        "Turkey",
+        "United Kingdom",
+        "United States",
+        "Uruguay",
+      ];
 
       const centroids = geojson.features
         .filter((feature) =>
@@ -249,6 +318,7 @@ export default defineComponent({
           color: feature.properties.color, // Use the assigned color for each country
           tempoBuckets:
             this.tempoBuckets[feature.properties.name] || new Array(10).fill(0),
+          listOfCountriesInsideBubble: [],
         }));
 
       const thresholdDistance = 50 / zoomLevel;
@@ -281,6 +351,10 @@ export default defineComponent({
               mergedBubbles[j].tempoBuckets[index] += count;
             });
 
+            mergedBubbles[j].listOfCountriesInsideBubble.push(
+              centroids[i].name
+            );
+
             merged = true;
             break;
           }
@@ -293,9 +367,10 @@ export default defineComponent({
             count: 1,
             color: centroids[i].color,
             name: centroids[i].name,
+            listOfCountriesInsideBubble: [centroids[i].name], // Initialize with country name
             tempoBuckets: [
               ...(centroids[i].tempoBuckets || new Array(10).fill(0)),
-            ], // Copy or default to empty array
+            ],
           });
         }
       }
@@ -316,25 +391,22 @@ export default defineComponent({
         let [x, y] = bubble.centroid;
         const color = bubble.color;
 
-        // Adjust x, y coordinates by the current zoom transformation
         const transform = d3.zoomTransform(svg.node());
         x = transform.applyX(x);
         y = transform.applyY(y);
 
-        // Check if the bubble is within the visible bounds of the SVG
         if (x < 0 || x > svg.attr("width") || y < 0 || y > svg.attr("height")) {
-          return; // Skip drawing this bubble if it's outside the viewport
+          return;
         }
+
         // Draw histogram above the bubble based on `tempoBuckets`
         const bucketWidth = 5;
         const maxCount = d3.max(bubble.tempoBuckets);
-        const scaleY = d3.scaleLinear().domain([0, maxCount]).range([0, 30]); // Set maximum height of the histogram
+        const scaleY = d3.scaleLinear().domain([0, maxCount]).range([0, 30]);
 
         bubble.tempoBuckets.forEach((count, i) => {
-          // Calculate the height of each bar based on bucket count
           const barHeight = scaleY(count);
 
-          // Append a rectangle for each histogram bar
           svg
             .append("rect")
             .attr(
@@ -343,13 +415,43 @@ export default defineComponent({
                 (bucketWidth * bubble.tempoBuckets.length) / 2 +
                 i * bucketWidth
             )
-            .attr("y", y - 20 - barHeight) // Position above the bubble
+            .attr("y", y - 20 - barHeight)
             .attr("width", bucketWidth)
             .attr("height", barHeight)
             .attr("fill", color)
             .attr("stroke", "black")
             .attr("stroke-width", 0.5);
         });
+
+        // Add event listeners for tooltip
+        svg
+          .append("circle")
+          .attr("class", "tooltip-circle")
+          .attr("cx", x)
+          .attr("cy", y)
+          .attr("r", 10)
+          .attr("fill", color)
+          .attr("stroke", "white") // Adds a white stroke around the circle
+          .attr("stroke-width", 2) // Increases the stroke width for better visibility
+          .style("filter", "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5))") // Adds shadow for depth
+          .on("mouseover", function (event) {
+            // Show tooltip with list of countries inside this bubble
+            tooltip
+              .style("visibility", "visible")
+              .text(bubble.listOfCountriesInsideBubble.join(" & "));
+
+            tooltip
+              .style("top", `${event.pageY + 10}px`)
+              .style("left", `${event.pageX + 10}px`);
+          })
+          .on("mousemove", function (event) {
+            tooltip
+              .style("top", `${event.pageY + 10}px`)
+              .style("left", `${event.pageX + 10}px`);
+          })
+          .on("mouseout", function () {
+            tooltip.style("visibility", "hidden");
+          });
       });
 
       // Log or return the list of merged country groups with final colors
