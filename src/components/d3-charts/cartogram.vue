@@ -65,13 +65,13 @@ export default defineComponent({
     };
   },
   mounted() {
-    this.createTempoHistogram("src/datasets/cartogram.countries.data.json"); // Call with the JSON path
+    this.createTempoHistogram("src/datasets/cartogram.countries.updated.data.json"); // Call with the JSON path
   },
   methods: {
     changeVariable() {
       this.closeMap();
       console.log("selected feature is ", this.selectedFeature);
-      this.createTempoHistogram("src/datasets/cartogram.countries.data.json");
+      this.createTempoHistogram("src/datasets/cartogram.countries.updated.data.json");
     },
     closeMap() {
       // Remove the entire map container
@@ -137,82 +137,52 @@ export default defineComponent({
       const defaultColor = "#dcdcdc"; // Grey color for countries not in the dictionary
 
       const countryColors = {
-        Afghanistan: "#FF5733", // Bright Orange
-        Angola: "#33FF57", // Bright Green
-        Argentina: "#3357FF", // Bright Blue
-        Armenia: "#FF33A1", // Bright Pink
-        Australia: "#33FFF5", // Bright Cyan
-        Austria: "#FF33FF", // Bright Magenta
-        Azerbaijan: "#FF8C33", // Bright Orange-Red
-        Belgium: "#33FF8C", // Bright Mint
-        Brazil: "#33A1FF", // Light Blue
-        Canada: "#FF3333", // Bright Red
-        Chile: "#33FF33", // Bright Lime
-        China: "#FF5733", // Bright Orange
-        Colombia: "#33FF57", // Bright Green
-        "Costa Rica": "#3357FF", // Bright Blue
-        Croatia: "#FF33A1", // Bright Pink
-        Cuba: "#33FFF5", // Bright Cyan
-        Cyprus: "#FF33FF", // Bright Magenta
-        "Côte d'Ivoire": "#FF8C33", // Bright Orange-Red
-        Denmark: "#33FF8C", // Bright Mint
-        Ecuador: "#33A1FF", // Light Blue
-        Estonia: "#FF3333", // Bright Red
-        Finland: "#33FF33", // Bright Lime
-        France: "#FF5733", // Bright Orange
-        Germany: "#33FF57", // Bright Green
-        Greece: "#3357FF", // Bright Blue
-        Guatemala: "#FF33A1", // Bright Pink
-        Hungary: "#33FFF5", // Bright Cyan
-        Iceland: "#FF33FF", // Bright Magenta
-        India: "#FF8C33", // Bright Orange-Red
-        Indonesia: "#33FF8C", // Bright Mint
-        Iraq: "#33A1FF", // Light Blue
-        Ireland: "#FF3333", // Bright Red
-        Israel: "#33FF33", // Bright Lime
-        Italy: "#FF5733", // Bright Orange
-        Jamaica: "#33FF57", // Bright Green
-        Japan: "#3357FF", // Bright Blue
-        Kosovo: "#FF33A1", // Bright Pink
-        Latvia: "#33FFF5", // Bright Cyan
-        Lithuania: "#FF33FF", // Bright Magenta
-        Malaysia: "#FF8C33", // Bright Orange-Red
-        Mali: "#33FF8C", // Bright Mint
-        Mexico: "#33A1FF", // Light Blue
-        Moldova: "#FF3333", // Bright Red
-        Montenegro: "#33FF33", // Bright Lime
-        Netherlands: "#FF5733", // Bright Orange
-        "New Zealand": "#33FF57", // Bright Green
-        Nicaragua: "#3357FF", // Bright Blue
-        Nigeria: "#FF33A1", // Bright Pink
-        "North Macedonia": "#33FFF5", // Bright Cyan
-        Norway: "#FF33FF", // Bright Magenta
-        Panama: "#FF8C33", // Bright Orange-Red
-        Paraguay: "#33FF8C", // Bright Mint
-        Peru: "#33A1FF", // Light Blue
-        Philippines: "#FF3333", // Bright Red
-        Poland: "#33FF33", // Bright Lime
-        Portugal: "#FF5733", // Bright Orange
-        Romania: "#33FF57", // Bright Green
-        Russia: "#3357FF", // Bright Blue
-        Senegal: "#FF33A1", // Bright Pink
-        Slovakia: "#33FFF5", // Bright Cyan
-        Slovenia: "#FF33FF", // Bright Magenta
-        "South Africa": "#FF8C33", // Bright Orange-Red
-        "South Korea": "#33FF8C", // Bright Mint
-        Spain: "#33A1FF", // Light Blue
-        Suriname: "#FF3333", // Bright Red
-        Sweden: "#33FF33", // Bright Lime
-        Switzerland: "#FF5733", // Bright Orange
-        Taiwan: "#33FF57", // Bright Green
-        Thailand: "#3357FF", // Bright Blue
-        Turkey: "#FF33A1", // Bright Pink
-        Ukraine: "#33FFF5", // Bright Cyan
-        "United Kingdom": "#FF33FF", // Bright Magenta
-        "United States": "#FF8C33", // Bright Orange-Red
-        Uruguay: "#33FF8C", // Bright Mint
-        Venezuela: "#33A1FF", // Light Blue
-      };
+    'Argentina': '#FF5733',    // Bright Orange
+    'Australia': '#33FF57',    // Bright Green
+    'Austria': '#3357FF',      // Bright Blue
+    'Belgium': '#FF33A1',      // Bright Pink
+    'Brazil': '#33FFF5',       // Bright Cyan
+    'Canada': '#FF33FF',       // Bright Magenta
+    'Chile': '#FF8C33',        // Bright Orange-Red
+    'China': '#33FF8C',        // Bright Mint
+    'Colombia': '#33A1FF',     // Light Blue
+    'Costa Rica': '#FF3333',   // Bright Red
+    'Denmark': '#33FF33',      // Bright Lime
+    'Ecuador': '#FF5733',      // Bright Orange
+    'Estonia': '#33FF57',      // Bright Green
+    'Finland': '#3357FF',      // Bright Blue
+    'France': '#FF33A1',       // Bright Pink
+    'Germany': '#33FFF5',      // Bright Cyan
+    'Greece': '#FF33FF',       // Bright Magenta
+    'Guatemala': '#FF8C33',    // Bright Orange-Red
+    'Hungary': '#33FF8C',      // Bright Mint
+    'Iceland': '#33A1FF',      // Light Blue
+    'India': '#FF3333',        // Bright Red
+    'Ireland': '#33FF33',      // Bright Lime
+    'Italy': '#FF5733',        // Bright Orange
+    'Japan': '#33FF57',        // Bright Green
+    'Latvia': '#3357FF',       // Bright Blue
+    'Lithuania': '#FF33A1',    // Bright Pink
+    'Malaysia': '#33FFF5',     // Bright Cyan
+    'Mexico': '#FF33FF',       // Bright Magenta
+    'Netherlands': '#FF8C33',  // Bright Orange-Red
+    'New Zealand': '#33FF8C',  // Bright Mint
+    'Norway': '#33A1FF',       // Light Blue
+    'Panama': '#FF3333',       // Bright Red
+    'Paraguay': '#33FF33',     // Bright Lime
+    'Peru': '#FF5733',         // Bright Orange
+    'Philippines': '#33FF57',  // Bright Green
+    'Poland': '#3357FF',       // Bright Blue
+    'Portugal': '#FF33A1',     // Bright Pink
+    'South Korea': '#33FFF5',  // Bright Cyan
+    'Spain': '#FF33FF',        // Bright Magenta
+    'Sweden': '#FF8C33',       // Bright Orange-Red
+    'Taiwan': '#33FF8C',       // Bright Mint
+    'Turkey': '#33A1FF',       // Light Blue
+    'United Kingdom': '#FF3333',// Bright Red
+    'United States': '#33FF33',// Bright Lime
+    'Uruguay': '#FF5733'       // Bright Orange
+}
 
       // Set up a projection and path generator
       const projection = d3
@@ -267,59 +237,7 @@ export default defineComponent({
     },
 
     updateBubbles(geojson, svg, pathGenerator, zoomLevel) {
-      const countriesThatAreInDataset = [
-        "Lithuania",
-        "Latvia",
-        "Germany",
-        "France",
-        "Ireland",
-        "Japan",
-        "Philippines",
-        "India",
-        "Guatemala",
-        "Canada",
-        "Costa Rica",
-        "United Kingdom",
-        "United States of America",
-        "Malaysia",
-        "Bolivia",
-        "Italy",
-        "Mexico",
-        "Colombia",
-        "Netherlands",
-        "Brazil",
-        "Norway",
-        "Ecuador",
-        "Iceland",
-        "Greece",
-        "Estonia",
-        "Sweden",
-        "Australia",
-        "Taiwan",
-        "Denmark",
-        "Dominican Republic",
-        "Turkey",
-        "Hungary",
-        "El Salvador",
-        "Honduras",
-        "Belgium",
-        "South Korea",
-        "Austria",
-        "Uruguay",
-        "Panama",
-        "Spain",
-        "Finland",
-        "Paraguay",
-        "Peru",
-        "Luxembourg",
-        "Chile",
-        "New Zealand",
-        "Portugal",
-        "Czech Republic",
-        "China",
-        "Poland",
-        "Argentina",
-      ];
+      const countriesThatAreInDataset = ['Argentina', 'Australia', 'Austria', 'Belgium', 'Brazil', 'Canada', 'Chile', 'China', 'Colombia', 'Costa Rica', 'Denmark', 'Ecuador', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Guatemala', 'Hungary', 'Iceland', 'India', 'Ireland', 'Italy', 'Japan', 'Latvia', 'Lithuania', 'Malaysia', 'Mexico', 'Netherlands', 'New Zealand', 'Norway', 'Panama', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'South Korea', 'Spain', 'Sweden', 'Taiwan', 'Turkey', 'United Kingdom', 'United States', 'Uruguay'];
 
       const centroids = geojson.features
         .filter((feature) =>
