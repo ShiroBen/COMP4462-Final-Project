@@ -66,6 +66,9 @@ export default defineComponent({
         Argentina: "#2E8B57", // Sea green
       };
     },
+    maxStreams() {
+      return 8752070076;
+    },
   },
   data() {
     return {
@@ -116,13 +119,17 @@ export default defineComponent({
       this.countryCentroids = {};
 
       // Draw the map and calculate centroids for each country
+      // Draw the map and calculate centroids for each country
       svg
         .selectAll("path")
         .data(geojson.features)
         .enter()
         .append("path")
         .attr("d", path)
-        .attr("fill", "#dcdcdc")
+        .attr(
+          "fill",
+          (d) => this.countryColours[d.properties.name] || "#dcdcdc"
+        ) // Color based on countryColours, default to "#dcdcdc"
         .attr("stroke", "#888")
         .each((d) => {
           // Calculate the centroid for each country and store it in the dictionary
@@ -142,22 +149,6 @@ export default defineComponent({
       // Select only countries listed as keys in streamData
       const countryNames = Object.keys(this.streamData);
 
-      // Draw a red dot on each country's centroid
-      this.svg
-        .selectAll("circle")
-        .data(
-          this.geojson.features.filter((d) =>
-            countryNames.includes(d.properties.name)
-          )
-        )
-        .enter()
-        .append("circle")
-        .attr("cx", (d) => this.projection(geoCentroid(d))[0])
-        .attr("cy", (d) => this.projection(geoCentroid(d))[1])
-        .attr("r", 3)
-        .attr("fill", "red")
-        .attr("stroke", "black")
-        .attr("stroke-width", 0.5);
     },
     async calculateArrowSizes() {
       // Access the stream data
@@ -177,7 +168,7 @@ export default defineComponent({
 
           // Calculate the arrow size (adjust the scale as needed)
           //const arrowSize = Math.sqrt(streams) * 2; // Arbitrary scaling factor
-          const arrowSize = 2;
+          const arrowSize = Math.round((streams / this.maxStreams) * 40);
 
           // Store the arrow size in the object
           if (!this.arrowSizes[origin]) {
