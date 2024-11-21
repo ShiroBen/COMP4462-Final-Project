@@ -6,7 +6,7 @@
   src="https://observablehq.com/embed/66ebda84a4824705@375?cells=chart"></iframe>
 </template>
 <script setup>
-import * as Plot from "@observablehq/plot";
+// import * as Plot from "@observablehq/plot";
 import { defineComponent, ref, onMounted,h } from 'vue';
 import * as d3 from 'd3';
 

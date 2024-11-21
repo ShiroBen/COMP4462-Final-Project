@@ -4,6 +4,9 @@ import TimeDV from '@/views/TimeDV.vue'
 import SpatialDV from '@/views/SpatialDV.vue'
 import Sankey from '@/views/SpatialViews/Sankey.vue';      // Import the new component
 import Cartogram from '@/views/SpatialViews/Cartogram.vue'; // Import the new component
+import radarChart from '@/components/d3-charts/radarChart.vue'
+import barChart from '@/components/d3-charts/barchart.vue'
+import scatterPlot from '@/components/d3-charts/scatterPlot.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,7 +27,24 @@ const router = createRouter({
     {
       path: '/TimeDV',
       name: 'TimeDV',
-      component: TimeDV
+      component: TimeDV,
+      children: [
+        {
+          path: '/radar',
+          name: 'radar',
+          component: radarChart
+        },
+        {
+          path: '/bar',
+          name: 'bar',
+          component: barChart
+        },
+        {
+          path: '/scatter',
+          name: 'scatter',
+          component: scatterPlot
+        }
+      ]
     },
     {
       path: '/SpatialDV',

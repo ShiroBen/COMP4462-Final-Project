@@ -30,7 +30,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="js">
   import { RouterLink, RouterView } from 'vue-router'
   // import TimeOrSpatial from './views/TimeOrSpatial.vue';
   import TimeDV from '@/views/TimeDV.vue'
