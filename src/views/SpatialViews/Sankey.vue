@@ -1,59 +1,86 @@
 <template>
-    <div class="container">
-      <div class="label-container">
-        <router-link to="/SpatialDV" class="label" active-class="active">Choropleth</router-link>
-        <router-link to="/sankey" class="label" active-class="active">Sankey</router-link>
-        <router-link to="/cartogram" class="label" active-class="active">Cartogram</router-link>
-      </div>
-      <h1>This is Sankey</h1>
+  <div>
+    <div class="label-container">
+      <router-link to="/SpatialDV" class="label" active-class="active">Choropleth</router-link>
+      <router-link to="/Sankey" class="label" active-class="active">Sankey</router-link>
+      <router-link to="/cartogram" class="label" active-class="active">Cartogram</router-link>
     </div>
-  </template>
-  
-  <script lang="ts">
-  export default {
-    name: 'Sankey',
-  };
-  </script>
-  
-  <script setup lang="ts">
-  import { RouterLink } from 'vue-router'; // Import RouterLink for navigation
-  </script>
-  
-  <style scoped>
-  .choropleth-container {
-    padding: 20px; /* Add padding to the container for spacing */
-    background-color: #ffffff; /* Set background to white for main content */
-  }
-  
-  .label-container {
-    display: flex;                    /* Use flexbox for horizontal layout */
-    justify-content: space-around;    /* Evenly distribute space */
-    padding: 10px 0;                 /* Add padding to the label container */
-    border-bottom: 2px solid #333;    /* Add a bottom border for separation */
-  }
-  
-  .label {
-    text-decoration: none;            /* Remove underline */
-    color: black;                     /* Text color */
-    transition: color 0.3s;          /* Smooth transition for color */
-    padding: 10px 15px;               /* Padding for clickable area */
-  }
-  
-  .label:hover {
-    color: green;                   /* Change color on hover to match app theme */
-  }
-  
-  .label.active {
-    color: #42b983;                   /* Change color when active (clicked) */
-  }
+    
+    <div class="map-container">
+      <Sankey />
+    </div>
+  </div>
+</template>
 
-  .label:not(:last-child)::after {
-    content: '';                    
-    display: inline-block;          
-    width: 2px;                     
-    height: 20px;                  
-    background-color: #333;         
-    margin-left: 150px;   
-    vertical-align: middle;          
+<script lang="ts">
+import Sankey from '../../components/d3-charts/sankey.vue'; // Adjust the path as necessary
+
+</script>
+
+<script setup lang="ts">
+import { RouterLink } from 'vue-router'; // Import RouterLink for navigation
+</script>
+
+<style>
+.label-container {
+  display: flex;                    
+  justify-content: space-around;    
+  padding: 10px 0;                 
+  border-bottom: 2px solid #333;    
 }
-  </style>
+
+.label {
+  text-decoration: none;            
+  color: black;                     
+  transition: color 0.3s;          
+  padding: 10px 15px;               
+  position: relative;               
+}
+
+.label:hover {
+  color: #66d6a1;                   
+}
+
+.label.active,
+.label.exact-active {
+  color: #66d6a1;                   
+}
+
+.label:not(:last-child)::after {
+  content: '';                    
+  display: inline-block;          
+  width: 2px;                     
+  height: 20px;                  
+  background-color: #333;         
+  margin-left: 150px;   
+  vertical-align: middle;          
+}
+
+/* Style for the map container */
+.map-container {
+  display: flex; /* Use flexbox to align map and filter container */
+  justify-content: space-between; /* Space between map and filter */
+  width: 100%;         
+  height: 450px;      
+  margin-top: 20px;   
+  border: 1px solid #ccc; /* Optional: Add a border for visibility */
+}
+
+/* Style for the filter container */
+.filter-container {
+  display: flex;
+  flex-direction: column; /* Stack label and select vertically */
+  padding: 10px; /* Add padding */
+}
+
+.filter-label {
+  font-size: 1.0em; /* Set the font size to smaller */
+  margin-bottom: 10px; /* Space between label and select */
+}
+
+select {
+  padding: 5px; /* Padding for select */
+  border: 1px solid #ccc; /* Border for select */
+  border-radius: 4px; /* Rounded corners */
+}
+</style>
