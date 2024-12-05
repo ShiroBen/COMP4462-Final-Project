@@ -1,6 +1,7 @@
 This is the final project for HKUST COMP4462: Data Visualization
 ---
-If you want to run our project locally, you should first install node.js.
+If you want to run our project locally, you should first install node.js. </br> </br>
+Please also download the dataset from the below Google Drive link. After downloading the zip file, please extract all the data files into src/dataset folder. 
 
 Then, run:
 ```npm install```
@@ -23,7 +24,8 @@ Finally, you may execute command:
 ```npm run dev```
 to start a local server and enjoy our visualizations!
 
-The data is too big therefore, we have put in Google Drive. Google Drive: https://drive.google.com/file/d/1D4mENwHmkjlNvc6GVNg2Pt093MrIUc3f/view?usp=sharing
+The data is too big therefore, we have put in Google Drive. Google Drive: https://drive.google.com/file/d/1D4mENwHmkjlNvc6GVNg2Pt093MrIUc3f/view?usp=sharing </br>
+
 
 For task 1 , the original Observable Notebook links are as below:
 Scatter Plot: https://observablehq.com/d/85ab1b5459c1bc05
