@@ -1,6 +1,6 @@
 This is the final project for HKUST COMP4462: Data Visualization
 ---
-If you want to run our project locally, you should first install node.js. </br> </br>
+Please run the project locally. To run our project locally, you should first install node.js. </br> </br>
 Please also download the dataset from the below Google Drive link. After downloading the zip file, please extract all the data files into src/dataset folder. 
 
 Then, run:
